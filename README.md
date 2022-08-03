@@ -16,3 +16,18 @@ Tests are written following `unittest` framework. Some dependencies are needed (
 python -m unittest discover
 ```
 
+## Build the project
+
+To perform the build, you need to install `dist-requirements.txt` list of packages, then run the following command. All the files will be located in `dist` directory.
+
+```bash
+python -m build
+```
+
+## Upload the project
+
+The project can be uploaded using twine (listed in `dist-requirements.txt`) by running the following command:
+
+```bash
+python -m twine upload dist/*
+```
