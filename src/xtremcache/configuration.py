@@ -1,7 +1,8 @@
 from pathlib import Path
-from utils import Utils
 import os
 import yaml
+
+from .utils import Utils
 
 class ConfigurationFactory():
     """Create configuration object from file or dict, or the reverse."""

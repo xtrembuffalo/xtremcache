@@ -3,9 +3,10 @@ import sys
 import os
 import argparse
 from pathlib import Path
-from configuration import ConfigurationFactory
-from utils import Utils
-from cachemanager import CacheManager
+
+from .configuration import ConfigurationFactory
+from .utils import Utils
+from .cachemanager import CacheManager
 
 # Configuration
 class CommandRunner():

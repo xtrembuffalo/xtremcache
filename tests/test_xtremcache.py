@@ -1,9 +1,10 @@
 import unittest
 import tempfile
 import os
+import sys
 from pathlib import Path
 from filecmp import dircmp
-from xtremcache import CacheManager
+from src.xtremcache.cachemanager import CacheManager
 
 class TestCache(unittest.TestCase):
     def __init__(self, methodName: str = ...) -> None:

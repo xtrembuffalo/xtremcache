@@ -1,6 +1,4 @@
-import os
 import hashlib
-import sys
 
 class Utils():
     """Useful functions for the whole application."""
