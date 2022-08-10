@@ -3,7 +3,7 @@ import tempfile
 import os
 from pathlib import Path
 from filecmp import dircmp
-from src.xtremcache.xtremcache import CacheManager
+from xtremcache import CacheManager
 
 class TestCache(unittest.TestCase):
     def __init__(self, methodName: str = ...) -> None:

@@ -1,31 +1,16 @@
+from re import A
 import sys
 import os
 import argparse
-from src.xtremcache.archiver import ZipArchiver
-from src.xtremcache.configuration import Configuration, ConfigurationFactory
-from src.xtremcache.utils import Utils
 from pathlib import Path
-
-# Configuration
-class CacheManager():
-    def __init__(self, cache_dir, max_size) -> None:
-        self.__cache_dir = cache_dir
-        self.__max_size = max_size
-
-    def cache(self, id, path):
-        archive_name = Utils.str_to_md5(id)
-        destination = os.path.join(self.__cache_dir, archive_name)
-        archiver = ZipArchiver(destination)
-        archiver.archive(path)
-    
-    def uncache(self, id, path):
-        archive_name = Utils.str_to_md5(id)
-        source = os.path.join(self.__cache_dir, archive_name)
-        archiver = ZipArchiver(source)
-        archiver.extract(path)
+from configuration import ConfigurationFactory
+from utils import Utils
+from cachemanager import CacheManager
 
 # Configuration
 class CommandRunner():
+    """Convert input command (executable arguments) to CacheManager methode."""
+    
     def __init__(self, manager) -> None:
         self.__manager = manager
 
@@ -71,7 +56,7 @@ def get_args():
         type=str,
         help='Cache destination.'
     )
-
+    
     # Configuration file location
     parser.add_argument(
         '--config-file',
@@ -82,17 +67,21 @@ def get_args():
     )
     return parser.parse_args()
 
+def command_runnner(args, configuration):
+    command = getattr(args, 'command', None)
+    if command:
+        command_runner = CommandRunner(CacheManager(configuration.cache_dir, configuration.max_size))
+        attr = getattr(command_runner, command, None)
+        if attr is not None:
+            attr(args)
+
 def run(args):
     # Init configuration
     configuration = ConfigurationFactory(args.config_file).from_file()
     print(configuration)
 
     # Command runner
-    command_runner = CommandRunner(CacheManager(configuration.cache_dir, configuration.max_size))
-    command = getattr(args, 'command', None)
-    attr = getattr(command_runner, command, None)
-    if attr is not None:
-        attr(args)
+    command_runnner(args, configuration)
 
 def main():
     return run(get_args())

@@ -2,7 +2,6 @@ from abc import abstractmethod
 import shutil
 import os
 import pathlib
-from zipfile import ZipFile
 
 # Cache / Uncache
 class Archiver():

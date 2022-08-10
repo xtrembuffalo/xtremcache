@@ -1,9 +1,11 @@
 from pathlib import Path
-from src.xtremcache.utils import Utils
+from utils import Utils
 import os
 import yaml
 
 class ConfigurationFactory():
+    """Create configuration object from file or dict, or the reverse."""
+
     def __init__(self, config_file) -> None:
         self.__config_file = config_file
 
@@ -53,6 +55,7 @@ class ConfigurationFactory():
 # Configuration
 class Configuration():
     """Global application configuration."""
+    
     def __init__(self) -> None:
         self.cache_dir = os.path.join(Path.home(), f'.{Utils.get_app_name()}', 'datas')
         self.max_size = 10000
