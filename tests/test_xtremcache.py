@@ -1,10 +1,17 @@
 import unittest
 import tempfile
 import os
-import sys
 from pathlib import Path
 from filecmp import dircmp
-from src.xtremcache.cachemanager import CacheManager
+
+try:
+    import sys
+    path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src', 'xtremcache'))
+    sys.path.insert(0, path)
+    from cachemanager import CacheManager
+except:
+    print(f"Impossible to import from {path}")
+
 
 class TestCache(unittest.TestCase):
     def __init__(self, methodName: str = ...) -> None:

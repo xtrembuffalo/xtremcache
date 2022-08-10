@@ -42,17 +42,31 @@ class ZipArchiver():
 
     @abstractmethod
     def archive(self, path):
-        shutil.make_archive(
-            base_name=self.archive_path_without_ext,
-            format=ZipArchiver.format,
-            root_dir=os.path.dirname(path),
-            base_dir=os.path.basename(path))
+        rt = True
+        try:
+            shutil.make_archive(
+                base_name=self.archive_path_without_ext,
+                format=ZipArchiver.format,
+                root_dir=os.path.dirname(path),
+                base_dir=os.path.basename(path))
+            rt = False
+        except Exception as e:
+            print("Impossible to create archive:")
+            print(e)
+        return rt
 
     @abstractmethod
     def extract(self, path):
-        shutil.unpack_archive(
-            filename=self.archive_path,
-            extract_dir=path,
-            format=ZipArchiver.format)
+        rt = True
+        try:
+            shutil.unpack_archive(
+                filename=self.archive_path,
+                extract_dir=path,
+                format=ZipArchiver.format)
+            rt = False
+        except Exception as e:
+            print("Impossible to extract archive:")
+            print(e)
+        return rt
 
        

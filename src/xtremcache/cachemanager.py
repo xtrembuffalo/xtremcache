@@ -1,7 +1,7 @@
 import os
 
-from .archiver import ZipArchiver
-from .utils import Utils
+from archiver import ZipArchiver
+from utils import Utils
 
 class CacheManager():
     """All actions to do when file or directory is cached or exit from the cache."""
@@ -10,12 +10,22 @@ class CacheManager():
         self.__cache_dir = cache_dir
         self.__max_size = max_size
 
-    def cache(self, id, path):
-        archive_name = Utils.str_to_md5(id)
+    def __archive(self, archive_name, path):
         destination = os.path.join(self.__cache_dir, archive_name)
-        ZipArchiver(destination).archive(path)
+        return ZipArchiver(destination).archive(path)
+        
+    def __extract(self, archive_name, path):
+        source = os.path.join(self.__cache_dir, archive_name)
+        return ZipArchiver(source).extract(path)
+
+    def cache(self, id, path):
+        rt = True
+        archive_name = Utils.str_to_md5(id)
+        rt |= self.__archive(archive_name, path)
+        return rt
     
     def uncache(self, id, path):
+        rt = True
         archive_name = Utils.str_to_md5(id)
-        source = os.path.join(self.__cache_dir, archive_name)
-        ZipArchiver(source).extract(path)
+        rt |= self.__extract(archive_name, path)
+        return rt
