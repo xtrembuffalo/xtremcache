@@ -1,9 +1,9 @@
 import sys
 import os
 import argparse
-from archiver import ZipArchiver
-from configuration import Configuration, ConfigurationFactory
-from utils import Utils
+from src.xtremcache.archiver import ZipArchiver
+from src.xtremcache.configuration import Configuration, ConfigurationFactory
+from src.xtremcache.utils import Utils
 from pathlib import Path
 
 # Configuration

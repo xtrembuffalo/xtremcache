@@ -1,8 +1,9 @@
 import unittest
 import tempfile
 import os
-from xtremcache import CacheManager
-from configuration import Configuration
+from pathlib import Path
+from filecmp import dircmp
+from src.xtremcache.xtremcache import CacheManager
 
 class TestCache(unittest.TestCase):
     def __init__(self, methodName: str = ...) -> None:
@@ -28,3 +29,26 @@ class TestCacheDir(TestCache):
         cache_manager = CacheManager(cache_dir, max_size)
         cache_manager.cache(id, self.__dir_to_cache)
         cache_manager.uncache(id, self.__dir_to_uncache)
+
+        dircmp_res = dircmp(self.__dir_to_uncache, self.__dir_to_cache)
+        self.assertListEqual(dircmp_res.diff_files, [])
+
+class TestCacheFile(TestCache):
+    def setUp(self):
+        self.__file_content = f"Content of file"
+        self._temp_dir = tempfile.mkdtemp()
+        self.__file_to_cache = os.path.join(self._temp_dir, "file_to_cache.txt")
+        with open(self.__file_to_cache, 'a') as f:
+            f.write(self.__file_content)
+
+    def test_cache_dir(self):
+        cache_dir = os.path.join(self._temp_dir, 'datas')
+        max_size = 100
+        id = "TestCacheFile"
+
+        cache_manager = CacheManager(cache_dir, max_size)
+        cache_manager.cache(id, self.__file_to_cache)
+        os.remove(self.__file_to_cache)
+        cache_manager.uncache(id, self._temp_dir)
+
+        self.assertEqual(Path(self.__file_to_cache).read_text(), self.__file_content)

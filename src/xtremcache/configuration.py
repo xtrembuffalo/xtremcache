@@ -1,5 +1,5 @@
 from pathlib import Path
-from utils import Utils
+from src.xtremcache.utils import Utils
 import os
 import yaml
 
