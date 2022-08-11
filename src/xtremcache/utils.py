@@ -1,4 +1,5 @@
 import hashlib
+import sys
 
 class Utils():
     """Useful functions for the whole application."""
@@ -11,3 +12,6 @@ class Utils():
 
     def str_to_md5(val):
         return hashlib.md5(val.encode()).hexdigest()
+
+    def isUnix():
+        return not ('win' in sys.platform)

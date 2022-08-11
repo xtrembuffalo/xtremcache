@@ -6,67 +6,81 @@ import pathlib
 # Cache / Uncache
 class Archiver():
     def __init__(self, archive_path) -> None:
-        self.__archive_path = archive_path
-
-    @abstractmethod
-    def archive(sources):
-       pass
-
-    @abstractmethod
-    def extract(sources):
-       pass
-
-    @property
-    def archive_path(self):
-        return self.__archive_path
-
-class ZipArchiver():
-    format = 'zip'
-    
-    def __init__(self, archive_path) -> None:
         self.archive_path = archive_path
 
     @property
-    def archive_path(self):
-        return self.__archive_path
-
-    @archive_path.setter
-    def archive_path(self, path):
-        suffix = pathlib.Path(path).suffix
-        self.__archive_path = path if suffix else '.'.join([path, ZipArchiver.format])
+    @abstractmethod
+    def format(self):
+        pass
 
     @property
-    def archive_path_without_ext(self):
-        return os.path.join(os.path.dirname(self.__archive_path),
-                            pathlib.Path(self.__archive_path).stem)
-
     @abstractmethod
+    def ext(self):
+        pass
+
+    @property
+    def archive_path(self):
+        return self.__archive_path
+    
+    @property
+    def archive_path_with_ext(self):
+        return self.archive_path + f'.{self.ext}'
+    
+    @archive_path.setter
+    def archive_path(self, path):
+        self.__archive_path = path
+
     def archive(self, path):
-        rt = True
+        rt = False
         try:
             shutil.make_archive(
-                base_name=self.archive_path_without_ext,
-                format=ZipArchiver.format,
+                base_name=self.archive_path,
+                format=self.format,
                 root_dir=os.path.dirname(path),
                 base_dir=os.path.basename(path))
-            rt = False
+            rt = True
         except Exception as e:
             print("Impossible to create archive:")
             print(e)
         return rt
 
-    @abstractmethod
     def extract(self, path):
-        rt = True
+        rt = False
         try:
             shutil.unpack_archive(
-                filename=self.archive_path,
+                filename=self.archive_path_with_ext,
                 extract_dir=path,
-                format=ZipArchiver.format)
-            rt = False
+                format=self.format)
+            rt = True
         except Exception as e:
             print("Impossible to extract archive:")
             print(e)
         return rt
 
-       
+class ZipArchiver(Archiver):
+    def __init__(self, archive_path) -> None:
+        super().__init__(archive_path)
+    
+    @property
+    @abstractmethod
+    def format(self):
+        return 'zip'
+
+    @property
+    @abstractmethod
+    def ext(self):
+        return 'zip'
+
+class GZipArchiver(Archiver):
+    def __init__(self, archive_path) -> None:
+        super().__init__(archive_path)
+        
+    @property
+    @abstractmethod
+    def format(self):
+        return 'gztar'
+
+    @property
+    @abstractmethod
+    def ext(self):
+        return 'tar.gz'

@@ -1,3 +1,4 @@
+import glob
 import unittest
 import tempfile
 import os
@@ -9,6 +10,7 @@ try:
     path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src', 'xtremcache'))
     sys.path.insert(0, path)
     from cachemanager import CacheManager
+    from utils import Utils
 except:
     print(f"Impossible to import from {path}")
 
@@ -26,8 +28,14 @@ class TestCacheDir(TestCache):
         for i in range(10):
             sub_dir = os.path.join(self.__dir_to_cache, f"sub_dir_{i}")
             os.makedirs(sub_dir)
-            with open(os.path.join(sub_dir, f"file_{i}.txt"), 'a') as f:
+            file = os.path.join(sub_dir, f"file_{i}.txt")
+            with open(file, 'a') as f:
                 f.write(f"Content of file_{i}")
+            if Utils.isUnix():
+                cwd = os.getcwd()
+                os.chdir(os.path.dirname(file))
+                os.symlink(os.path.basename(file), f"file_{i}_symnlink.txt")
+                os.chdir(cwd)
 
     def test_cache_dir(self):
         cache_dir = os.path.join(self._temp_dir, 'datas')
@@ -35,11 +43,15 @@ class TestCacheDir(TestCache):
         id = "TestCacheDir"
 
         cache_manager = CacheManager(cache_dir, max_size)
-        cache_manager.cache(id, self.__dir_to_cache)
-        cache_manager.uncache(id, self.__dir_to_uncache)
+        self.assertTrue(cache_manager.cache(id, self.__dir_to_cache))
+        self.assertTrue(cache_manager.uncache(id, self.__dir_to_uncache))
 
         dircmp_res = dircmp(self.__dir_to_uncache, self.__dir_to_cache)
         self.assertListEqual(dircmp_res.diff_files, [])
+
+        if Utils.isUnix():
+            for f in glob.glob(os.path.join(self.__dir_to_uncache, '**', 'file_*_symnlink.txt'), recursive=True):
+                self.assertTrue(os.path.islink(f))
 
 class TestCacheFile(TestCache):
     def setUp(self):
@@ -55,8 +67,8 @@ class TestCacheFile(TestCache):
         id = "TestCacheFile"
 
         cache_manager = CacheManager(cache_dir, max_size)
-        cache_manager.cache(id, self.__file_to_cache)
+        self.assertTrue(cache_manager.cache(id, self.__file_to_cache))
         os.remove(self.__file_to_cache)
-        cache_manager.uncache(id, self._temp_dir)
+        self.assertTrue(cache_manager.uncache(id, self._temp_dir))
 
         self.assertEqual(Path(self.__file_to_cache).read_text(), self.__file_content)
