@@ -50,7 +50,9 @@ class TestCacheDir(TestCache):
         self.assertListEqual(dircmp_res.diff_files, [])
 
         if Utils.isUnix():
-            for f in glob.glob(os.path.join(self.__dir_to_uncache, '**', 'file_*_symnlink.txt'), recursive=True):
+            symnlink = glob.glob(os.path.join(self.__dir_to_uncache, '**', 'file_*_symnlink.txt'), recursive=True)
+            self.assertNotEqual(symnlink, [])
+            for f in symnlink:
                 self.assertTrue(os.path.islink(f))
 
 class TestCacheFile(TestCache):
