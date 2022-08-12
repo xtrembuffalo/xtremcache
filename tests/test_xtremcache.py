@@ -8,7 +8,6 @@ from filecmp import dircmp
 from xtremcache import CacheManager
 from xtremcache import Utils
 
-
 class TestCache(unittest.TestCase):
     def __init__(self, methodName: str = ...) -> None:
         super().__init__(methodName)
