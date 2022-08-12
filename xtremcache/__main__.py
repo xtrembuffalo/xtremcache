@@ -10,14 +10,15 @@ from xtremcache.cachemanager import CacheManager
 
 # Configuration
 class CommandRunner():
-    """Convert input command (executable arguments) to CacheManager methode."""
+    """Convert input command (executable arguments) to CacheManager method."""
     
     def __init__(self, manager) -> None:
         self.__manager = manager
 
     def cache(self, args):
         self.__manager.cache(id = getattr(args, 'id', None),
-                             path = getattr(args, 'path', None))
+                             path = getattr(args, 'path', None),
+                             force = getattr(args, 'force', None))
     
     def uncache(self, args):
         self.__manager.uncache(id = getattr(args, 'id', None),
@@ -31,12 +32,19 @@ def get_args():
     sub_parsers = parser.add_subparsers(help="subparsers", dest='command')
     
     # Put in cache
-    cache_parser = sub_parsers.add_parser('cache', help='Put in cache')
+    cache_parser = sub_parsers.add_parser('cache', help='Put in cache.')
     cache_parser.add_argument(
         '--id',
+        '-i',
         type=str,
         default=None,
         help='UUID'
+    )
+    cache_parser.add_argument(
+        '--force',
+        '-f',
+        action='store_true',
+        help='Force update current cached archive.'
     )
     cache_parser.add_argument(
         'path',
@@ -48,6 +56,7 @@ def get_args():
     uncache_parser = sub_parsers.add_parser('uncache', help='Put in cache')
     uncache_parser.add_argument(
         '--id',
+        '-i',
         type=str,
         default=None,
         help='UUID'
@@ -61,10 +70,11 @@ def get_args():
     # Configuration file location
     parser.add_argument(
         '--config-file',
+        '-c',
         type=str,
         required=False,
         default=os.path.join(Path.home(), f".{Utils.get_app_name()}", 'config'),
-        help='Max cache size (Mo)'
+        help='Max cache size (Mo).'
     )
     return parser.parse_args()
 

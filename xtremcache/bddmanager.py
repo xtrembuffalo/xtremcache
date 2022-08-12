@@ -47,7 +47,7 @@ class BddManager():
 
             @property
             def can_modifie(self):
-                return self.can_read() and self.readers == 0
+                return self.can_read and self.readers == 0
             
             @property
             def can_read(self):
