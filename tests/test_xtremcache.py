@@ -5,14 +5,8 @@ import os
 from pathlib import Path
 from filecmp import dircmp
 
-try:
-    import sys
-    path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src', 'xtremcache'))
-    sys.path.insert(0, path)
-    from cachemanager import CacheManager
-    from utils import Utils
-except:
-    print(f"Impossible to import from {path}")
+from xtremcache import CacheManager
+from xtremcache import Utils
 
 
 class TestCache(unittest.TestCase):

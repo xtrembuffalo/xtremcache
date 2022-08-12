@@ -2,7 +2,7 @@ from pathlib import Path
 import os
 import yaml
 
-from utils import Utils
+from xtremcache.utils import Utils
 
 class ConfigurationFactory():
     """Create configuration object from file or dict, or the reverse."""

@@ -1,7 +1,6 @@
 from abc import abstractmethod
 import shutil
 import os
-import pathlib
 
 # Cache / Uncache
 class Archiver():

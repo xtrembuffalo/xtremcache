@@ -3,13 +3,7 @@ import tempfile
 import os
 import random
 
-try:
-    import sys
-    path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src', 'xtremcache'))
-    sys.path.insert(0, path)
-    from bddmanager import BddManager
-except:
-    print(f"Impossible to import from {path}")
+from xtremcache import BddManager
 
 
 class TestBddManager(unittest.TestCase):

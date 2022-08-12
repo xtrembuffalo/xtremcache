@@ -6,7 +6,7 @@ from sqlalchemy import String, Integer
 from sqlalchemy.orm import declarative_base
 from sqlalchemy import create_engine
 
-from utils import Utils
+from xtremcache.utils import Utils
 
 class BddManager():
     """Data base to valid operations on cached files."""

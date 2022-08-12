@@ -1,8 +1,8 @@
 import os
 
-from archiver import GZipArchiver, ZipArchiver
-from utils import Utils
-from bddmanager import BddManager
+from xtremcache.archiver import GZipArchiver, ZipArchiver
+from xtremcache.utils import Utils
+from xtremcache.bddmanager import BddManager
 
 class CacheManager():
     """All actions to do when file or directory is cached or exit from the cache."""

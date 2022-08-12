@@ -4,9 +4,9 @@ import os
 import argparse
 from pathlib import Path
 
-from configuration import ConfigurationFactory
-from utils import Utils
-from cachemanager import CacheManager
+from xtremcache.configuration import ConfigurationFactory
+from xtremcache.utils import Utils
+from xtremcache.cachemanager import CacheManager
 
 # Configuration
 class CommandRunner():
