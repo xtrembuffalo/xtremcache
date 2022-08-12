@@ -13,6 +13,13 @@ class TestCache(unittest.TestCase):
         super().__init__(methodName)
         self._temp_dir = tempfile.mkdtemp()
 
+    def test_uncache_non_existing_archive(self):
+        cache_dir = os.path.join(self._temp_dir, 'datas')
+        max_size = 100
+
+        cache_manager = CacheManager(cache_dir, max_size)
+        self.assertFalse(cache_manager.uncache("TestCacheNotExists", '.'))
+
 class TestCacheDir(TestCache):
     def setUp(self):
         self._temp_dir = tempfile.mkdtemp()
@@ -48,6 +55,15 @@ class TestCacheDir(TestCache):
             for f in symnlink:
                 self.assertTrue(os.path.islink(f))
 
+    def test_cache_non_existing_dir(self):
+        cache_dir = os.path.join(self._temp_dir, 'datas')
+        max_size = 100
+        id = "TestCacheDir"
+
+        cache_manager = CacheManager(cache_dir, max_size)
+        self.assertFalse(cache_manager.cache(id, self.__dir_to_cache + "__"))
+        self.assertFalse(cache_manager.uncache(id, self.__dir_to_uncache))
+
 class TestCacheFile(TestCache):
     def setUp(self):
         self.__file_content = f"Content of file"
@@ -56,7 +72,7 @@ class TestCacheFile(TestCache):
         with open(self.__file_to_cache, 'a') as f:
             f.write(self.__file_content)
 
-    def test_cache_dir(self):
+    def test_cache_file(self):
         cache_dir = os.path.join(self._temp_dir, 'datas')
         max_size = 100
         id = "TestCacheFile"
@@ -67,3 +83,12 @@ class TestCacheFile(TestCache):
         self.assertTrue(cache_manager.uncache(id, self._temp_dir))
 
         self.assertEqual(Path(self.__file_to_cache).read_text(), self.__file_content)
+
+    def test_cache_non_existing_file(self):
+        cache_dir = os.path.join(self._temp_dir, 'datas')
+        max_size = 100
+        id = "TestCacheFile"
+
+        cache_manager = CacheManager(cache_dir, max_size)
+        self.assertFalse(cache_manager.cache(id, self.__file_to_cache  + "__"))
+        self.assertFalse(cache_manager.uncache(id, self._temp_dir))

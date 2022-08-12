@@ -30,18 +30,18 @@ class Archiver():
         self.__archive_path = path
 
     def archive(self, path):
-        rt = False
         try:
-            shutil.make_archive(
-                base_name=self.archive_path,
-                format=self.format,
-                root_dir=os.path.dirname(path),
-                base_dir=os.path.basename(path))
-            rt = True
+            if not os.path.exists(path):
+                raise FileNotFoundError(path)
+            else:
+                shutil.make_archive(
+                    base_name=self.archive_path,
+                    format=self.format,
+                    root_dir=os.path.dirname(path),
+                    base_dir=os.path.basename(path))
         except Exception as e:
-            print("Impossible to create archive:")
             print(e)
-        return rt
+        return self.archive_path_with_ext if os.path.exists(self.archive_path_with_ext) else None
 
     def extract(self, path):
         rt = False
@@ -52,7 +52,6 @@ class Archiver():
                 format=self.format)
             rt = True
         except Exception as e:
-            print("Impossible to extract archive:")
             print(e)
         return rt
 

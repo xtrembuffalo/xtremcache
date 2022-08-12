@@ -2,7 +2,7 @@ import os
 from functools import lru_cache
 from sqlalchemy.orm import Session
 from sqlalchemy import Column
-from sqlalchemy import String, Integer
+from sqlalchemy import String, Integer, Boolean
 from sqlalchemy.orm import declarative_base
 from sqlalchemy import create_engine
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
@@ -41,23 +41,60 @@ class BddManager():
 
             id = Column(String, primary_key=True)
             size = Column(Integer, nullable=False, unique=True)
+            readers = Column(Integer, nullable=False, unique=True)
+            writer = Column(Boolean, nullable=False, unique=True)
+            archive_path = Column(String, nullable=False, unique=True)
+
+            @property
+            def can_modifie(self):
+                return self.can_read() and self.readers == 0
+            
+            @property
+            def can_read(self):
+                return not self.writer
 
             def __repr__(self):
                 return f"<Item(id='{self.id}')>"
         return Item
     
-    def create_item(self, id:str, size:int):
-        return self.__Item(id=id, size=size)
+    def create_item(
+        self,
+        id:str,
+        size:int = 0,
+        readers:int = 0,
+        writer:bool = False,
+        archive_path:str = ''
+        ):
+        return self.__Item(
+            id=id,
+            size=size,
+            readers=readers,
+            writer=writer,
+            archive_path=archive_path)
 
-    def add_item(self, model):
-        rt = False
+    def add_update_item(self, item):
+        valid = False
         try:
-            self.__session.add(model)
+            self.__session.add(item)
             self.__session.commit()
-            rt = True
+            valid = True
         except Exception as e:
             print(e)
-        return rt
+            self.__session.rollback()
+            valid = False
+        return item if valid else None
+
+    def remove_item(self, item):
+        valid = False
+        try:
+            self.__session.delete(item)
+            self.__session.commit()
+            valid = True
+        except Exception as e:
+            print(e)
+            self.__session.rollback()
+            valid = False
+        return valid
 
     def get_item_by_id(self, id):
         item = None
