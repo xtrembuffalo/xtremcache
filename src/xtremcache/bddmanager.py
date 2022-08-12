@@ -24,7 +24,7 @@ class BddManager():
 
     @property
     @lru_cache
-    def Item(self):
+    def __Item(self):
         class Item(self.__base):
             __tablename__ = 'items'
 
@@ -37,7 +37,10 @@ class BddManager():
         return Item
     
     def __init_model_classes(self):
-        self.Item
+        self.__Item
+
+    def create_item(self, id:str, size:int):
+        return self.__Item(id=id, size=size)
 
     @property
     @lru_cache
@@ -49,12 +52,9 @@ class BddManager():
         os.chdir(cwd)
         return rt
 
-    def add_model(self, model):
+    def add_item(self, model):
         rt = False
-        try:
-            self.__session.add_all([model])
-            self.__session.commit()
+        with Session(self.__engine) as session:
+            session.add(model)
             rt = True
-        except:
-            self.__session.rollback()
         return rt

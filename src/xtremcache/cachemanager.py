@@ -25,9 +25,8 @@ class CacheManager():
         archive_path = os.path.join(self.__cache_dir, archive_name)
         archive_path_with_ext = self.__Archiver(archive_path).archive_path_with_ext
 
-        id = id
         size = os.path.getsize(archive_path_with_ext)
-        return self.__bdd_manager.Item(id=id, size=size)
+        return self.__bdd_manager.create_item(id=id, size=size)
 
     def cache(self, id, path):
         rt = True
@@ -36,7 +35,7 @@ class CacheManager():
         rt |= self.__archive(archive_name, path)
 
         item = self.__create_item(id, archive_name)
-        rt |= self.__bdd_manager.add_model(item)
+        rt |= self.__bdd_manager.add_item(item)
         return rt
     
     def uncache(self, id, path):
