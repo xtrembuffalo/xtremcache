@@ -5,7 +5,7 @@ import argparse
 from pathlib import Path
 
 from xtremcache.configuration import ConfigurationFactory
-from xtremcache.utils import Utils
+from xtremcache.utils import *
 from xtremcache.cachemanager import CacheManager
 
 # Configuration
@@ -73,7 +73,7 @@ def get_args():
         '-c',
         type=str,
         required=False,
-        default=os.path.join(Path.home(), f".{Utils.get_app_name()}", 'config'),
+        default=os.path.join(Path.home(), f".{get_app_name()}", 'config'),
         help='Max cache size (Mo).'
     )
     return parser.parse_args()

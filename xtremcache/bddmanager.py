@@ -7,7 +7,7 @@ from sqlalchemy.orm import declarative_base
 from sqlalchemy import create_engine
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
-from xtremcache.utils import Utils
+from xtremcache.utils import *
 
 class BddManager():
     """Data base to valid operations on cached files."""
@@ -26,7 +26,7 @@ class BddManager():
         os.makedirs(self.__data_base_dir, exist_ok=True)
         cwd = os.getcwd()
         os.chdir(self.__data_base_dir)
-        rt = create_engine(f"sqlite:///{Utils.get_app_name()}.db", echo=True)
+        rt = create_engine(f"sqlite:///{get_app_name()}.db", echo=True)
         os.chdir(cwd)
         return rt
 

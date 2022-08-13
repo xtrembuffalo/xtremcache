@@ -2,7 +2,7 @@ from pathlib import Path
 import os
 import yaml
 
-from xtremcache.utils import Utils
+from xtremcache.utils import *
 
 class ConfigurationFactory():
     """Create configuration object from file or dict, or the reverse."""
@@ -23,7 +23,7 @@ class ConfigurationFactory():
     def create_configuration_from_datas(datas):
         configuration = Configuration()
         if datas:
-            for p in Utils.get_public_props(configuration):
+            for p in get_public_props(configuration):
                 v = datas.get(p, None)
                 if v is not None:
                     setattr(configuration, p, v)
@@ -31,19 +31,19 @@ class ConfigurationFactory():
 
     def read_config_file(path):
         datas = {}
-        datas[Utils.get_app_name()] = {}
+        datas[get_app_name()] = {}
         if os.path.isfile(path):
             with open(path, 'r') as f:
                 datas = yaml.safe_load(f)
-        return datas[Utils.get_app_name()]
+        return datas[get_app_name()]
 
     def create_datas_from_configuration(configuration):
         datas = {}
-        datas[Utils.get_app_name()] = {}
-        for p in Utils.get_public_props(configuration):
+        datas[get_app_name()] = {}
+        for p in get_public_props(configuration):
             v = getattr(configuration, p, None)
             if v is not None :
-                datas[Utils.get_app_name()][p]=v
+                datas[get_app_name()][p]=v
         return datas
 
     def write_config_file(path, datas):
@@ -58,7 +58,7 @@ class Configuration():
     """Global application configuration."""
     
     def __init__(self) -> None:
-        self.cache_dir = os.path.join(Path.home(), f'.{Utils.get_app_name()}', 'datas')
+        self.cache_dir = os.path.join(Path.home(), f'.{get_app_name()}', 'datas')
         self.max_size = 10000
 
     @property

@@ -9,7 +9,7 @@ from pathlib import Path
 from filecmp import dircmp
 
 from xtremcache import CacheManager
-from xtremcache import Utils
+from xtremcache.utils import *
 
 def get_random_text(len=10):
     return ''.join(random.choice(string.ascii_lowercase) for i in range(len))
@@ -22,7 +22,7 @@ def generate_dir_to_cache(root):
             os.makedirs(os.path.dirname(file_path), exist_ok=True)
             with open(file_path, 'a') as f:
                 f.write(get_random_text(100))
-            if Utils.isUnix():
+            if isUnix():
                 cwd = os.getcwd()
                 os.chdir(os.path.dirname(file_path))
                 os.symlink(os.path.basename(file_path), f"{get_random_text()}_symnlink.txt")
@@ -44,7 +44,7 @@ class TestCacheDir(unittest.TestCase):
         self.assertTrue(cache_manager.uncache(id, self.__dir_to_uncache))
         dircmp_res = dircmp(self.__dir_to_uncache, self.__dir_to_cache)
         self.assertListEqual(dircmp_res.diff_files, [])
-        if Utils.isUnix():
+        if isUnix():
             symnlink = glob.glob(os.path.join(self.__dir_to_uncache, '**', 'file_*_symnlink.txt'), recursive=True)
             self.assertNotEqual(symnlink, [])
             for f in symnlink:

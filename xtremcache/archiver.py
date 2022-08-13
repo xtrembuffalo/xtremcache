@@ -2,10 +2,15 @@ from abc import abstractmethod
 import shutil
 import os
 
+from xtremcache.utils import *
+
+def create_archiver(cache_dir):
+    return GZipArchiver(cache_dir) if isUnix() else ZipArchiver(cache_dir)
+
 # Cache / Uncache
 class Archiver():
-    def __init__(self, archive_path) -> None:
-        self.archive_path = archive_path
+    def __init__(self, cache_dir):
+        self._cache_dir = cache_dir
 
     @property
     @abstractmethod
@@ -17,38 +22,39 @@ class Archiver():
     def ext(self):
         pass
 
-    @property
-    def archive_path(self):
-        return self.__archive_path
-    
-    @property
-    def archive_path_with_ext(self):
-        return self.archive_path + f'.{self.ext}'
-    
-    @archive_path.setter
-    def archive_path(self, path):
-        self.__archive_path = path
+    def id_to_hash(self, id):
+        return str_to_md5(id)
 
-    def archive(self, path):
+    def id_to_filename(self, id):
+        return f"{self.id_to_hash(id)}.{self.format}"
+
+    def id_to_archive_path(self, id):
+        return os.path.join(self._cache_dir, self.id_to_filename(id))
+
+    def archive(self, id, src_path):
+        archive_path = self.id_to_archive_path(id)
         try:
-            if not os.path.exists(path):
-                raise FileNotFoundError(path)
+            if not os.path.exists(src_path):
+                raise FileNotFoundError(src_path)
             else:
                 shutil.make_archive(
-                    base_name=self.archive_path,
+                    base_name=remove_file_extention(archive_path),
                     format=self.format,
-                    root_dir=os.path.dirname(path),
-                    base_dir=os.path.basename(path))
+                    root_dir=os.path.dirname(src_path),
+                    base_dir=os.path.basename(src_path))
         except Exception as e:
             print(e)
-        return self.archive_path_with_ext if os.path.exists(self.archive_path_with_ext) else None
+        return archive_path if os.path.exists(archive_path) else None
 
-    def extract(self, path):
+    def extract(self, id, dest_path):
+        archive_path = self.id_to_archive_path(id)
         rt = False
         try:
+            if not os.path.exists(dest_path):
+                os.makedirs(dest_path, exist_ok=True)
             shutil.unpack_archive(
-                filename=self.archive_path_with_ext,
-                extract_dir=path,
+                filename=archive_path,
+                extract_dir=dest_path,
                 format=self.format)
             rt = True
         except Exception as e:
@@ -56,8 +62,8 @@ class Archiver():
         return rt
 
 class ZipArchiver(Archiver):
-    def __init__(self, archive_path) -> None:
-        super().__init__(archive_path)
+    def __init__(self, cache_dir) -> None:
+        super().__init__(cache_dir)
     
     @property
     @abstractmethod
@@ -70,8 +76,8 @@ class ZipArchiver(Archiver):
         return 'zip'
 
 class GZipArchiver(Archiver):
-    def __init__(self, archive_path) -> None:
-        super().__init__(archive_path)
+    def __init__(self, cache_dir) -> None:
+        super().__init__(cache_dir)
         
     @property
     @abstractmethod
