@@ -30,7 +30,7 @@ class CacheManager():
             if archive_path is not None:
                 item.size = os.path.getsize(archive_path)
                 item.writer = False
-                item.archive_path = archive_path
+                item.archive_path = os.path.relpath(archive_path, self.__cache_dir)
                 rt = True if bdd.add_update_item(item) is not None else False
                 if rt: self.__logger.info(f"{src_path} has been successfully cached (id={id})")
             else:
@@ -45,7 +45,7 @@ class CacheManager():
                     archive_path = self.__archiver.archive(id, src_path)
                     item.size = os.path.getsize(archive_path)
                     item.writer = False
-                    item.archive_path = archive_path
+                    item.archive_path = os.path.relpath(archive_path, self.__cache_dir)
                     rt = True if bdd.add_update_item(item) is not None else False
                     if rt: self.__logger.info(f"{src_path} has been successfully updated (id={id})")
                 else:
