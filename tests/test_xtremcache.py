@@ -25,7 +25,7 @@ def generate_dir_to_cache(root):
             if isUnix():
                 cwd = os.getcwd()
                 os.chdir(os.path.dirname(file_path))
-                os.symlink(os.path.basename(file_path), f"{get_random_text()}_symnlink.txt")
+                os.symlink(os.path.basename(file_path), f"{get_random_text()}_symlink.txt")
                 os.chdir(cwd)
 
 class TestCacheDir(unittest.TestCase):
@@ -45,9 +45,9 @@ class TestCacheDir(unittest.TestCase):
         dircmp_res = dircmp(self.__dir_to_uncache, self.__dir_to_cache)
         self.assertListEqual(dircmp_res.diff_files, [])
         if isUnix():
-            symnlink = glob.glob(os.path.join(self.__dir_to_uncache, '**', 'file_*_symnlink.txt'), recursive=True)
-            self.assertNotEqual(symnlink, [])
-            for f in symnlink:
+            symlink = glob.glob(os.path.join(self.__dir_to_uncache, '**', '*_symlink.txt'), recursive=True)
+            self.assertNotEqual(symlink, [])
+            for f in symlink:
                 self.assertTrue(os.path.islink(f))
 
     def test_cache_non_existing_dir(self):

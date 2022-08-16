@@ -26,7 +26,7 @@ class Archiver():
         return str_to_md5(id)
 
     def id_to_filename(self, id):
-        return f"{self.id_to_hash(id)}.{self.format}"
+        return f"{self.id_to_hash(id)}.{self.ext}"
 
     def id_to_archive_path(self, id):
         return os.path.join(self._cache_dir, self.id_to_filename(id))

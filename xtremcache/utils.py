@@ -3,6 +3,7 @@ from multiprocessing.pool import ThreadPool
 import sys
 import os
 import time
+from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
 
 def get_app_name():
@@ -19,8 +20,11 @@ def isUnix():
 
 def remove_file_extention(path):
     dir = os.path.dirname(path)
-    filename = os.path.splitext(os.path.basename(path))[0]
-    return os.path.join(dir, filename)
+    basename = os.path.basename(path)
+    suffixes = Path(basename).suffixes
+    for s in suffixes:
+        basename = basename.replace(s, '')
+    return os.path.join(dir, basename)
 
 class FunctionRetry(Exception):
    pass
