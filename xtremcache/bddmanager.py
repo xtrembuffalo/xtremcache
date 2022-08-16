@@ -1,4 +1,7 @@
+from ast import Delete
 import os
+import re
+import time
 from functools import lru_cache
 from sqlalchemy.orm import Session
 from sqlalchemy import Column
@@ -13,29 +16,29 @@ class BddManager():
     """Data base to valid operations on cached files."""
 
     def __init__(self, data_base_dir):
-        self.__data_base_dir = data_base_dir
-        self.__base = declarative_base()
-        self.__init_model_classes()
-        self.__base.metadata.drop_all(self.__engine)
-        self.__base.metadata.create_all(self.__engine)
-        self.__session = Session(bind=self.__engine)
+        self.__data_base_dir = os.path.realpath(data_base_dir)
 
     @property
     @lru_cache
-    def __engine(self):
-        os.makedirs(self.__data_base_dir, exist_ok=True)
-        cwd = os.getcwd()
-        os.chdir(self.__data_base_dir)
-        rt = create_engine(f"sqlite:///{get_app_name()}.db", echo=True)
-        os.chdir(cwd)
-        return rt
+    def __db_location(self):
+        return os.path.join(self.__data_base_dir, f"{get_app_name()}.db")
 
-    def __init_model_classes(self):
-        self.__Item
+    @property
+    @lru_cache
+    def __sqlite_db_location(self):
+        return f"sqlite:///{self.__db_location}"
+    
+    @property
+    @lru_cache
+    def __engine(self):
+        dir = os.path.dirname(self.__db_location)
+        os.makedirs(dir, exist_ok=True)
+        return create_engine(self.__sqlite_db_location, echo=True)
 
     @property
     @lru_cache
     def __Item(self):
+        self.__base = declarative_base()
         class Item(self.__base):
             __tablename__ = 'items'
 
@@ -55,6 +58,7 @@ class BddManager():
 
             def __repr__(self):
                 return f"<Item(id='{self.id}')>"
+        self.__base.metadata.create_all(self.__engine)
         return Item
     
     def create_item(
@@ -72,34 +76,45 @@ class BddManager():
             writer=writer,
             archive_path=archive_path)
 
-    def add_update_item(self, item):
-        valid = False
-        try:
-            self.__session.add(item)
-            self.__session.commit()
-            valid = True
-        except Exception as e:
-            print(e)
-            self.__session.rollback()
-            valid = False
-        return item if valid else None
+    def get_item(self, id, create=False):
+        item = None
+        with Session(self.__engine) as session:
+            try:
+                item = session.query(self.__Item).filter(self.__Item.id.in_([id])).one()
+            except NoResultFound as e:
+                item = None if not create else self.create_item(id=id, writer=True)
+                if item:
+                    session.add(item)
+                    session.commit()
+                    item = self.get_item(item.id)
+        return item
 
-    def remove_item(self, item):
+    def update(self, item):
         valid = False
-        try:
-            self.__session.delete(item)
-            self.__session.commit()
-            valid = True
-        except Exception as e:
-            print(e)
-            self.__session.rollback()
-            valid = False
+        with Session(self.__engine) as session:
+            try:
+                item_from_bdd = session.query(self.__Item).filter(self.__Item.id.in_([item.id])).one()
+            except NoResultFound as e:
+                print(e)
+                valid = False
+            else:
+                item_from_bdd.writer = item.writer
+                session.commit()
+                valid = True
+            finally:
+                return valid
+
+    def delete(self, id):
+        valid = False
+        with Session(self.__engine) as session:
+            try:
+                session.query(self.__Item).filter(self.__Item.id.in_([id])).delete()
+                session.commit()
+                valid = True
+            except NoResultFound as e:
+                valid = False
         return valid
 
-    def get_item_by_id(self, id):
-        item = None
-        try:
-            item = self.__session.query(self.__Item).filter(self.__Item.id.in_([id])).one()
-        except Exception as e:
-            print(e)
-        return item
+
+def create_bdd_manager(data_base_dir) -> BddManager:
+    return BddManager(data_base_dir)

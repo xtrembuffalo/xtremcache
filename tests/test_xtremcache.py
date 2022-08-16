@@ -8,7 +8,7 @@ import string
 from pathlib import Path
 from filecmp import dircmp
 
-from xtremcache import CacheManager
+from xtremcache import CacheManager, BddManager
 from xtremcache.utils import *
 
 def get_random_text(len=10):

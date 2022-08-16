@@ -1,6 +1,8 @@
 import hashlib
+from multiprocessing.pool import ThreadPool
 import sys
 import os
+from concurrent import futures
 
 def get_app_name():
     return "xtremcache"
