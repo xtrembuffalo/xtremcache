@@ -108,3 +108,17 @@ class TestCacheGlobal(unittest.TestCase):
         self.assertTrue(cache_manager.uncache("TestForceCache", self.__dir_to_uncache))
         dircmp_res = dircmp(self.__dir_to_uncache, self.__dir_to_cache)
         self.assertListEqual(dircmp_res.diff_files, [])
+
+    def test_asyc_cache(self):
+        cache_dir = os.path.join(self._temp_dir, 'datas')
+        max_size = 100
+        cache_manager = CacheManager(cache_dir, max_size)
+        self.assertTrue(cache_manager.cache("TestAsyncCache", self.__dir_to_cache))
+        bdd_manager = BddManager(cache_dir)
+        item = bdd_manager.get_item("TestAsyncCache")
+        item.writer = True
+        bdd_manager.update(item)
+        start_time = time.time()
+        timeout=2
+        self.assertFalse(cache_manager.uncache("TestAsyncCache", self.__dir_to_uncache, timeout=timeout))
+        self.assertGreaterEqual(time.time() - start_time, timeout)

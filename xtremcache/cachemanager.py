@@ -1,7 +1,7 @@
-from ast import Delete
 import os
 import logging
 import time
+from typing import final
 
 from xtremcache.archiver import create_archiver
 from xtremcache.bddmanager import BddManager
@@ -19,13 +19,13 @@ class CacheManager():
         self.__bdd_manager = BddManager(cache_dir)
         self.__logger = logging.getLogger(get_app_name())
 
-    def cache(self, *args, **kwargs):
-        return self.__cache(*args, **kwargs)
+    def cache(self, id, src_path, force=False, timeout=60*10):
+        return timeout_exec(timeout, self.__cache, id, src_path, force)
     
-    def uncache(self, *args, **kwargs):
-        return self.__uncache(*args, **kwargs)
-
-    def __cache(self, id, src_path, force=False):
+    def uncache(self, id, dest_path, force=False, timeout=60*10):
+        return timeout_exec(timeout, self.__uncache, id, dest_path, force)
+        
+    def __cache(self, id, src_path, force):
         rt = False
         bdd = self.__bdd_manager
         item = bdd.get_item(id, create=False)
@@ -46,16 +46,16 @@ class CacheManager():
             if item.can_modifie:
                 if force:
                     bdd.delete(id)
-                    rt = self.cache(id, src_path, False)
+                    rt = self.__cache(id, src_path, False)
                 else:
                     self.__logger.info(f"{src_path} is aleady chached (id={id})")
             else:
                 self.__logger.info(f"Waiting to have write access on archive (id={id})")
                 time.sleep(self.delay_time)
-                rt = self.cache(id, src_path, force)
+                raise FunctionRetry(False)
         return rt
     
-    def __uncache(self, id, dest_path, force=False):
+    def __uncache(self, id, dest_path, force):
         rt = False
         bdd = self.__bdd_manager
         item = bdd.get_item(id, create=False)
@@ -72,7 +72,7 @@ class CacheManager():
             else:
                 self.__logger.info(f"Waiting to have read access on cached archive (id={id})")
                 time.sleep(self.delay_time)
-                rt = self.uncache(id, dest_path)
+                raise FunctionRetry(False)
         else:
             self.__logger.error(f"Impossible to find cached archive (id={id})")
             rt = False
