@@ -1,7 +1,7 @@
 import unittest
 import tempfile
 
-from xtremcache import BddManager
+from xtremcache import *
 from test_utils import *
 
 def populate(bdd):
@@ -19,38 +19,44 @@ def populate(bdd):
 class TestBddManager(unittest.TestCase):
     def setUp(self):
         self.__temp_dir = tempfile.mkdtemp()
+        self.__bdd = BddManager(self.__temp_dir)
 
     def test_add_and_read_item(self):
-        item = BddManager(self.__temp_dir).get("TestBddManager", create=True)
+        item = self.__bdd.get("TestBddManager", create=True)
 
         item.writer = True
-        BddManager(self.__temp_dir).update(item)
+        self.__bdd.update(item)
 
-        item = BddManager(self.__temp_dir).get("TestBddManager")
+        item = self.__bdd.get("TestBddManager")
         self.assertTrue(item.writer)
 
     def test_read_nonexistent_item(self):
-        self.assertIsNone(BddManager(self.__temp_dir).get("TestBddManager", create=False))
+        self.assertRaises(XtremCacheItemNotFound, self.__bdd.get, "TestBddManager")
+
+    def test_update_non_existing_item(self):
+        item = self.__bdd.create_item("NonExistingId")
+        self.assertRaises(XtremCacheItemNotFound, self.__bdd.update, item)
 
     def test_clean_all_item(self):
         # Populate and clean and repeat
         for i in range(3):
-            item_list = populate(BddManager(self.__temp_dir))
-            BddManager(self.__temp_dir).delete_all()  
+            item_list = populate(self.__bdd)
+            self.__bdd.delete_all()  
             for item in item_list:
-                self.assertFalse(BddManager(self.__temp_dir).get(item.id, create=False))
+                self.assertRaises(XtremCacheItemNotFound, self.__bdd.get, item.id)
     
     def test_get_all_item(self):
         # Populate and get_all and repeat
         for i in range(3):
-            populate(BddManager(self.__temp_dir))
-            for item in BddManager(self.__temp_dir).get_all():
-                self.assertTrue(item == BddManager(self.__temp_dir).get(item.id))
+            populate(self.__bdd)
+            for item in self.__bdd.get_all():
+                self.assertTrue(item == self.__bdd.get(item.id))
 
     def test_get_all_item_values(self):
         # Populate and get_all and repeat
         for i in range(3):
-            item_list = populate(BddManager(self.__temp_dir))
+            item_list = populate(self.__bdd)
             size_sum = sum(item.size for item in item_list)
-            values_list_from_bdd = BddManager(self.__temp_dir).get_all_values('size')
+            values_list_from_bdd = self.__bdd.get_all_values('size')
             self.assertTrue(size_sum, sum(values_list_from_bdd))
+

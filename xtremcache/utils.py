@@ -28,14 +28,11 @@ def remove_file_extention(path):
 
 def timeout_exec(timeout, fn, *args, **kwargs):
     start_time = time.time()
-    retry = True       
-    rt = False
+    retry = True        
     while retry:
         try:
-            rt = fn(*args, **kwargs)
-            retry = False
+            return fn(*args, **kwargs)
         except FunctionRetry as e:
             if (time.time() - start_time) > timeout:
                 retry = False
-                rt = e.args[0] if len(e.args) else False
-    return rt
+                raise XtremCacheTimeoutError(e)

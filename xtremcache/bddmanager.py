@@ -11,9 +11,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 from xtremcache.utils import *
+from xtremcache.exceptions import *
 
 class BddManager():
-    """Data base to valid operations on cached files."""
+    """Database to valid operations on cached files."""
 
     def __init__(self, data_base_dir):
         self.__data_base_dir = os.path.realpath(data_base_dir)
@@ -99,27 +100,26 @@ class BddManager():
         with Session(self.__engine) as session:
             try:
                 item = session.query(self.__Item).filter(self.__Item.id.in_([id])).one()
-            except NoResultFound as e:
-                item = None if not create else self.create_item(id=id, writer=True)
-                if item:
-                    session.add(item)
+            except NoResultFound:
+                if create:
+                    session.add(self.create_item(id=id, writer=True))
                     session.commit()
                     return self.get(id)
+                else:
+                    raise XtremCacheItemNotFound(f"Impossible to find {id}")
         return item
 
     def update(self, item):
-        valid = False
+        item_from_bdd = self.get(item.id)
         with Session(self.__engine) as session:
             try:
                 item_from_bdd = session.query(self.__Item).filter(self.__Item.id.in_([item.id])).one()
+            except NoResultFound:
+                raise XtremCacheItemNotFound(f"Impossible to find {id}")
+            else:
                 item_from_bdd.copy_from(item)
                 session.commit()
-                valid = True
-            except NoResultFound as e:
-                print(e)
-                valid = False
-        return valid
-
+        
     def delete(self, id):
         valid = False
         with Session(self.__engine) as session:

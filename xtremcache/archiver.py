@@ -33,22 +33,20 @@ class Archiver():
 
     def archive(self, id, src_path):
         archive_path = self.id_to_archive_path(id)
+        if not os.path.exists(src_path):
+            raise XtremCacheFileNotFoundError(src_path)
         try:
-            if not os.path.exists(src_path):
-                raise FileNotFoundError(src_path)
-            else:
-                shutil.make_archive(
-                    base_name=remove_file_extention(archive_path),
-                    format=self.format,
-                    root_dir=os.path.dirname(src_path),
-                    base_dir=os.path.basename(src_path))
+            shutil.make_archive(
+                base_name=remove_file_extention(archive_path),
+                format=self.format,
+                root_dir=os.path.dirname(src_path),
+                base_dir=os.path.basename(src_path))
         except Exception as e:
-            print(e)
-        return archive_path if os.path.exists(archive_path) else None
+            raise XtremCacheArchiveCreationError(e)
+        return archive_path
 
     def extract(self, id, dest_path):
         archive_path = self.id_to_archive_path(id)
-        rt = False
         try:
             if not os.path.exists(dest_path):
                 os.makedirs(dest_path, exist_ok=True)
@@ -58,8 +56,7 @@ class Archiver():
                 format=self.format)
             rt = True
         except Exception as e:
-            print(e)
-        return rt
+            raise XtremCacheArchiveExtractionError(e)
 
 class ZipArchiver(Archiver):
     def __init__(self, cache_dir) -> None:
