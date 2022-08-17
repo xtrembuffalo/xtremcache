@@ -2,8 +2,27 @@ import random
 import string
 import os
 import random
+from ddt import ddt, data
 
 from xtremcache.utils import *
+
+def get_illegal_chars():
+    return [
+        r'\\',
+        r'}',
+        r'{',
+        r'&',
+        r'%',
+        r'#'
+    ]
+
+def get_id_data():
+    return (
+        'trunk@12594',
+        get_random_text(),
+        str_to_md5(get_random_text()),
+        ' '.join(get_illegal_chars()),
+        )
 
 def get_random_text(len=10):
     return ''.join(random.choice(string.ascii_lowercase) for i in range(len))

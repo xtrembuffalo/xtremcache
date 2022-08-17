@@ -1,5 +1,6 @@
 import unittest
 import tempfile
+from ddt import ddt, data
 
 from xtremcache import *
 from test_utils import *
@@ -16,25 +17,29 @@ def populate(bdd):
         item_list.append(item)
     return item_list
 
+@ddt
 class TestBddManager(unittest.TestCase):
     def setUp(self):
         self.__temp_dir = tempfile.mkdtemp()
         self.__bdd = BddManager(self.__temp_dir)
 
-    def test_add_and_read_item(self):
-        item = self.__bdd.get("TestBddManager", create=True)
+    @data(*get_id_data())
+    def test_add_and_read_item(self, id):
+        item = self.__bdd.get(id, create=True)
 
         item.writer = True
         self.__bdd.update(item)
 
-        item = self.__bdd.get("TestBddManager")
+        item = self.__bdd.get(id)
         self.assertTrue(item.writer)
 
-    def test_read_nonexistent_item(self):
-        self.assertRaises(XtremCacheItemNotFound, self.__bdd.get, "TestBddManager")
+    @data(*get_id_data())
+    def test_read_nonexistent_item(self, id):
+        self.assertRaises(XtremCacheItemNotFound, self.__bdd.get, id)
 
-    def test_update_non_existing_item(self):
-        item = self.__bdd.create_item("NonExistingId")
+    @data(*get_id_data())
+    def test_update_non_existing_item(self, id):
+        item = self.__bdd.create_item(id)
         self.assertRaises(XtremCacheItemNotFound, self.__bdd.update, item)
 
     def test_clean_all_item(self):

@@ -24,9 +24,6 @@ class CacheManager():
     def uncache(self, id, dest_path, timeout=60*10):
         timeout_exec(timeout, self.__uncache, id, dest_path)
 
-    def clear_all(self):
-        bdd = self.__bdd_manager
-
     def __cache(self, id, src_path, force):
         bdd = self.__bdd_manager
         try:
