@@ -1,10 +1,10 @@
 import hashlib
-from multiprocessing.pool import ThreadPool
 import sys
 import os
 import time
 from pathlib import Path
-from concurrent.futures import ThreadPoolExecutor
+
+from xtremcache.exceptions import *
 
 def get_app_name():
     return "xtremcache"
@@ -26,12 +26,9 @@ def remove_file_extention(path):
         basename = basename.replace(s, '')
     return os.path.join(dir, basename)
 
-class FunctionRetry(Exception):
-   pass
-
 def timeout_exec(timeout, fn, *args, **kwargs):
     start_time = time.time()
-    retry = True
+    retry = True       
     rt = False
     while retry:
         try:

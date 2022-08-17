@@ -6,13 +6,15 @@ from test_utils import *
 
 def populate(bdd):
     id_list = [get_random_text() for i in range(10)]
+    item_list = []
     for id in id_list:
         item = bdd.get(id, create=True)
         item.writer = False
         item.size = random.randint(0, 1000)
         item.readers = random.randint(0, 1000)
         bdd.update(item)
-        yield item
+        item_list.append(item)
+    return item_list
 
 class TestBddManager(unittest.TestCase):
     def setUp(self):
@@ -52,5 +54,3 @@ class TestBddManager(unittest.TestCase):
             size_sum = sum(item.size for item in item_list)
             values_list_from_bdd = BddManager(self.__temp_dir).get_all_values('size')
             self.assertTrue(size_sum, sum(values_list_from_bdd))
-            
-            
