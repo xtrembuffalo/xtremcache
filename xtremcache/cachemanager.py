@@ -22,8 +22,11 @@ class CacheManager():
     def cache(self, id, src_path, force=False, timeout=60*10):
         return timeout_exec(timeout, self.__cache, id, src_path, force)
     
-    def uncache(self, id, dest_path, force=False, timeout=60*10):
-        return timeout_exec(timeout, self.__uncache, id, dest_path, force)
+    def uncache(self, id, dest_path, timeout=60*10):
+        return timeout_exec(timeout, self.__uncache, id, dest_path)
+
+    def clear_all(self):
+        bdd = self.__bdd_manager
         
     def __cache(self, id, src_path, force):
         rt = False
@@ -43,24 +46,25 @@ class CacheManager():
                self.__logger.error(f"Impossible to create cache archive (check access right or disk space) (id={id})")
                rt = False
         else:
-            if item.can_modifie:
-                if force:
+            if force:
+                if item.can_modifie:
                     bdd.delete(id)
                     rt = self.__cache(id, src_path, False)
                 else:
-                    self.__logger.info(f"{src_path} is aleady chached (id={id})")
+                    self.__logger.info(f"Waiting to have write access on archive (id={id})")
+                    time.sleep(self.delay_time)
+                    raise FunctionRetry(False)
             else:
-                self.__logger.info(f"Waiting to have write access on archive (id={id})")
-                time.sleep(self.delay_time)
-                raise FunctionRetry(False)
+                self.__logger.info(f"{src_path} is aleady chached (id={id})")
+                rt = True
         return rt
     
-    def __uncache(self, id, dest_path, force):
+    def __uncache(self, id, dest_path):
         rt = False
         bdd = self.__bdd_manager
         item = bdd.get_item(id, create=False)
         if item:
-            if item.can_read or force:
+            if item.can_read:
                 item.readers = item.readers + 1
                 bdd.update(item)
                 if not self.__archiver.extract(id, dest_path):

@@ -42,11 +42,18 @@ class BddManager():
         class Item(self.__base):
             __tablename__ = 'items'
 
-            id = Column(String, primary_key=True)
-            size = Column(Integer, nullable=False, unique=True)
-            readers = Column(Integer, nullable=False, unique=True)
-            writer = Column(Boolean, nullable=False, unique=True)
-            archive_path = Column(String, nullable=False, unique=True)
+            id = Column(String, primary_key=True, unique=True)
+            size = Column(Integer, nullable=False)
+            readers = Column(Integer, nullable=False)
+            writer = Column(Boolean, nullable=False)
+            archive_path = Column(String, nullable=False)
+
+            def copy_from(self, item):
+                self.id = item.id
+                self.size = item.size
+                self.readers = item.readers
+                self.writer = item.writer
+                self.archive_path = item.archive_path
 
             @property
             def can_modifie(self):
@@ -86,7 +93,7 @@ class BddManager():
                 if item:
                     session.add(item)
                     session.commit()
-                    item = self.get_item(item.id)
+                    return self.get_item(id)
         return item
 
     def update(self, item):
@@ -94,15 +101,13 @@ class BddManager():
         with Session(self.__engine) as session:
             try:
                 item_from_bdd = session.query(self.__Item).filter(self.__Item.id.in_([item.id])).one()
+                item_from_bdd.copy_from(item)
+                session.commit()
+                valid = True
             except NoResultFound as e:
                 print(e)
                 valid = False
-            else:
-                item_from_bdd.writer = item.writer
-                session.commit()
-                valid = True
-            finally:
-                return valid
+        return valid
 
     def delete(self, id):
         valid = False
@@ -113,8 +118,19 @@ class BddManager():
                 valid = True
             except NoResultFound as e:
                 valid = False
+            
         return valid
 
+    def delete_all(self):
+        valid = False
+        with Session(self.__engine) as session:
+            try:
+                session.query(self.__Item).delete()
+                session.commit()
+                valid = True
+            except:
+                session.rollback()
+        return valid
 
 def create_bdd_manager(data_base_dir) -> BddManager:
     return BddManager(data_base_dir)
