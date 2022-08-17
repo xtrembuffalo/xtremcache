@@ -40,7 +40,15 @@ class BddManager():
     def __Item(self):
         self.__base = declarative_base()
         class Item(self.__base):
+
             __tablename__ = 'items'
+            data_members_name = [
+                'id',
+                'size',
+                'readers',
+                'writer',
+                'archive_path'
+            ]
 
             id = Column(String, primary_key=True, unique=True)
             size = Column(Integer, nullable=False)
@@ -49,11 +57,14 @@ class BddManager():
             archive_path = Column(String, nullable=False)
 
             def copy_from(self, item):
-                self.id = item.id
-                self.size = item.size
-                self.readers = item.readers
-                self.writer = item.writer
-                self.archive_path = item.archive_path
+                for m in self.data_members_name:
+                    setattr(self, m, getattr(item, m, None))
+
+            def __eq__(self, other):
+                for m in self.data_members_name:
+                    if getattr(self, m, None) != getattr(other, m, None):
+                        return False
+                return True
 
             @property
             def can_modifie(self):
@@ -131,6 +142,15 @@ class BddManager():
             except:
                 session.rollback()
         return valid
+
+    def get_all(self):
+        items = []
+        with Session(self.__engine) as session:
+            try:
+                items = session.query(self.__Item).all()
+            except Exception as e:
+                pass
+        return items
 
 def create_bdd_manager(data_base_dir) -> BddManager:
     return BddManager(data_base_dir)

@@ -27,7 +27,7 @@ class CacheManager():
 
     def clear_all(self):
         bdd = self.__bdd_manager
-        
+
     def __cache(self, id, src_path, force):
         rt = False
         bdd = self.__bdd_manager
