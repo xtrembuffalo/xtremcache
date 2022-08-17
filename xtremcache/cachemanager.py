@@ -31,9 +31,9 @@ class CacheManager():
     def __cache(self, id, src_path, force):
         rt = False
         bdd = self.__bdd_manager
-        item = bdd.get_item(id, create=False)
+        item = bdd.get(id, create=False)
         if item is None:
-            item = bdd.get_item(id, create=True)
+            item = bdd.get(id, create=True)
             archive_path = self.__archiver.archive(id, src_path)
             if archive_path is not None:
                 item.size = os.path.getsize(archive_path)
@@ -62,7 +62,7 @@ class CacheManager():
     def __uncache(self, id, dest_path):
         rt = False
         bdd = self.__bdd_manager
-        item = bdd.get_item(id, create=False)
+        item = bdd.get(id, create=False)
         if item:
             if item.can_read:
                 item.readers = item.readers + 1

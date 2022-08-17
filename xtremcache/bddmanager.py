@@ -6,7 +6,7 @@ from functools import lru_cache
 from sqlalchemy.orm import Session
 from sqlalchemy import Column
 from sqlalchemy import String, Integer, Boolean
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import declarative_base, load_only
 from sqlalchemy import create_engine
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
@@ -94,7 +94,7 @@ class BddManager():
             writer=writer,
             archive_path=archive_path)
 
-    def get_item(self, id, create=False):
+    def get(self, id, create=False):
         item = None
         with Session(self.__engine) as session:
             try:
@@ -104,7 +104,7 @@ class BddManager():
                 if item:
                     session.add(item)
                     session.commit()
-                    return self.get_item(id)
+                    return self.get(id)
         return item
 
     def update(self, item):
@@ -151,6 +151,9 @@ class BddManager():
             except Exception as e:
                 pass
         return items
+
+    def get_all_values(self, key):
+        return [ getattr(i, key, None) for i in self.get_all()]
 
 def create_bdd_manager(data_base_dir) -> BddManager:
     return BddManager(data_base_dir)

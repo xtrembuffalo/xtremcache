@@ -96,7 +96,7 @@ class TestCacheGlobal(unittest.TestCase):
         cache_manager = CacheManager(cache_dir, max_size)
         self.assertTrue(cache_manager.cache("TestAsyncCache", self.__dir_to_cache))
         bdd_manager = BddManager(cache_dir)
-        item = bdd_manager.get_item("TestAsyncCache")
+        item = bdd_manager.get("TestAsyncCache")
         item.writer = True
         bdd_manager.update(item)
         start_time = time.time()
