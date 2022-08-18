@@ -1,2 +1,3 @@
 build
 twine
+SQLAlchemy==1.4.35
