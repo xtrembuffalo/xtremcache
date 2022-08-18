@@ -86,7 +86,19 @@ class TestCacheGlobal(unittest.TestCase):
         self.assertListEqual(dircmp_res.diff_files, [])
 
     @data(*get_id_data())
-    def test_asyc_cache(self, id):
+    def test_timeout(self, id):
+        self.__cache_manager.cache(id, self.__dir_to_cache)
+        bdd_manager = BddManager(self.__cache_dir)
+        item = bdd_manager.get(id)
+        item.writer = True
+        bdd_manager.update(item)
+        start_time = time.time()
+        timeout=2
+        self.assertRaises(XtremCacheTimeoutError, self.__cache_manager.uncache, id, self.__dir_to_uncache, timeout=timeout)
+        self.assertGreaterEqual(time.time() - start_time, timeout)
+
+    @data(*get_id_data())
+    def test_timeout(self, id):
         self.__cache_manager.cache(id, self.__dir_to_cache)
         bdd_manager = BddManager(self.__cache_dir)
         item = bdd_manager.get(id)

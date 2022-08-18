@@ -19,8 +19,7 @@ def get_illegal_chars():
 def get_id_data():
     return (
         'trunk@12594',
-        get_random_text(),
-        str_to_md5(get_random_text()),
+        '13c988d4f15e06bcdd0b0af290086a3079cdadb0',
         ' '.join(get_illegal_chars()),
         )
 
