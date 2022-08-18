@@ -67,7 +67,7 @@ def unit_tests_step(){
     dir("sources"){
         withPythonEnv(python_exe) {
             withEnv(["PATH=${append_in_variable(env.PATH, get_python_venv_root())}"]) {
-                sh_bat "python -m pip install -r requirements.txt"
+                sh_bat "python -m pip install -r dist-requirements.txt"
                 sh_bat "python -m pip install -r test-requirements.txt"
                 sh_bat "python -m xmlrunner discover tests --output-file ${junit_results}"
             }
