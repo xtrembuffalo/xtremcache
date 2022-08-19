@@ -1,9 +1,9 @@
 import glob
-from pkgutil import get_data
 import shutil
 import unittest
 import tempfile
 import os
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from filecmp import dircmp
 from ddt import ddt, data
@@ -108,3 +108,42 @@ class TestCacheGlobal(unittest.TestCase):
         timeout=2
         self.assertRaises(XtremCacheTimeoutError, self.__cache_manager.uncache, id, self.__dir_to_uncache, timeout=timeout)
         self.assertGreaterEqual(time.time() - start_time, timeout)
+
+@ddt
+class TestCacheConcurrent(unittest.TestCase):
+    def setUp(self):
+        self._temp_dir = tempfile.mkdtemp()
+        self.__cache_dir = os.path.join(self._temp_dir, 'datas')
+        self.__dir_to_cache = os.path.join(self._temp_dir, "dir_to_cache")
+        generate_dir_to_cache(self.__dir_to_cache)
+
+    @data(*get_id_data())
+    def test_concurrent_same_id(self, id):
+        def exec_cache(cache_dir, dir_to_cache, id, index):
+            cache_manager = CacheManager(cache_dir)
+            cache_manager.cache(id, dir_to_cache)
+            dir_to_uncache = os.path.join(self._temp_dir, f"dir_to_uncache_{index}")
+            os.makedirs(dir_to_uncache)
+            cache_manager.uncache(id, dir_to_uncache)
+            dircmp_res = dircmp(dir_to_cache, dir_to_uncache)
+            self.assertListEqual(dircmp_res.diff_files, [])
+
+        for index in range(3):   
+            with ThreadPoolExecutor() as executor:
+                executor.submit(exec_cache, self.__cache_dir, self.__dir_to_cache, id, index)
+
+    @data(*get_id_data())
+    def test_concurrent(self, id):
+        def exec_cache(cache_dir, dir_to_cache, id, index):
+            id = id + f'{index}'
+            cache_manager = CacheManager(cache_dir)
+            cache_manager.cache(id + f'{index}', dir_to_cache)
+            dir_to_uncache = os.path.join(self._temp_dir, f"dir_to_uncache_{index}")
+            os.makedirs(dir_to_uncache)
+            cache_manager.uncache(id, dir_to_uncache)
+            dircmp_res = dircmp(dir_to_cache, dir_to_uncache)
+            self.assertListEqual(dircmp_res.diff_files, [])
+
+        for index in range(3):   
+            with ThreadPoolExecutor() as executor:
+                executor.submit(exec_cache, self.__cache_dir, self.__dir_to_cache, id, index)
