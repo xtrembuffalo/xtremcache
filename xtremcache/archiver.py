@@ -8,7 +8,7 @@ def create_archiver(cache_dir):
     return GZipArchiver(cache_dir) if isUnix() else ZipArchiver(cache_dir)
 
 # Cache / Uncache
-class Archiver():
+class ArchiveManager():
     def __init__(self, cache_dir):
         self._cache_dir = cache_dir
 
@@ -58,7 +58,7 @@ class Archiver():
         except Exception as e:
             raise XtremCacheArchiveExtractionError(e)
 
-class ZipArchiver(Archiver):
+class ZipArchiver(ArchiveManager):
     def __init__(self, cache_dir) -> None:
         super().__init__(cache_dir)
     
@@ -72,7 +72,7 @@ class ZipArchiver(Archiver):
     def ext(self):
         return 'zip'
 
-class GZipArchiver(Archiver):
+class GZipArchiver(ArchiveManager):
     def __init__(self, cache_dir) -> None:
         super().__init__(cache_dir)
         

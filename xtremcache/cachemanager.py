@@ -57,7 +57,10 @@ class CacheManager():
             bdd.update(item)
             try:
                 self.__archiver.extract(id, dest_path)
-            finally:
+            except XtremCacheArchiveExtractionError as e:
+                bdd.delete(id)
+                raise XtremCacheArchiveExtractionError(e)
+            else:
                 item.readers = item.readers - 1
                 bdd.update(item)
         else:

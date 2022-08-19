@@ -100,13 +100,13 @@ class BddManager():
         with Session(self.__engine) as session:
             try:
                 item = session.query(self.__Item).filter(self.__Item.id.in_([id])).one()
-            except NoResultFound:
+            except NoResultFound as e:
                 if create:
                     session.add(self.create_item(id=id, writer=True))
                     session.commit()
                     return self.get(id)
                 else:
-                    raise XtremCacheItemNotFound(f"Impossible to find {id}")
+                    raise XtremCacheItemNotFound(e)
         return item
 
     def update(self, item):
@@ -114,23 +114,20 @@ class BddManager():
         with Session(self.__engine) as session:
             try:
                 item_from_bdd = session.query(self.__Item).filter(self.__Item.id.in_([item.id])).one()
-            except NoResultFound:
-                raise XtremCacheItemNotFound(f"Impossible to find {id}")
+            except NoResultFound as e:
+                raise XtremCacheItemNotFound(e)
             else:
                 item_from_bdd.copy_from(item)
                 session.commit()
         
     def delete(self, id):
-        valid = False
         with Session(self.__engine) as session:
             try:
                 session.query(self.__Item).filter(self.__Item.id.in_([id])).delete()
                 session.commit()
                 valid = True
             except NoResultFound as e:
-                valid = False
-            
-        return valid
+                raise XtremCacheItemNotFound(e)
 
     def delete_all(self):
         valid = False

@@ -8,7 +8,7 @@ from pathlib import Path
 from filecmp import dircmp
 from ddt import ddt, data
 
-from xtremcache import CacheManager, BddManager
+from xtremcache import CacheManager, BddManager, ArchiveManager
 from test_utils import *
 from xtremcache import *
 
@@ -98,16 +98,21 @@ class TestCacheGlobal(unittest.TestCase):
         self.assertGreaterEqual(time.time() - start_time, timeout)
 
     @data(*get_id_data())
-    def test_timeout(self, id):
+    def test_extraction_error(self, id):
         self.__cache_manager.cache(id, self.__dir_to_cache)
-        bdd_manager = BddManager(self.__cache_dir)
-        item = bdd_manager.get(id)
-        item.writer = True
-        bdd_manager.update(item)
-        start_time = time.time()
-        timeout=2
-        self.assertRaises(XtremCacheTimeoutError, self.__cache_manager.uncache, id, self.__dir_to_uncache, timeout=timeout)
-        self.assertGreaterEqual(time.time() - start_time, timeout)
+        filter  = os.path.join(self.__cache_dir, f"*.{create_archiver(self.__cache_dir).ext}")
+        [os.remove(file) for file in glob.glob(filter)]
+        self.assertRaises(XtremCacheArchiveExtractionError, self.__cache_manager.uncache, id, self.__dir_to_uncache)
+        self.assertRaises(XtremCacheItemNotFound, self.__cache_manager.uncache, id, self.__dir_to_uncache)
+        self.__cache_manager.cache(id, self.__dir_to_cache)
+        self.__cache_manager.uncache(id, self.__dir_to_uncache)
+
+    @data(*get_id_data())
+    def test_archive_creation_error(self, id):
+        archive_manager = create_archiver(self.__cache_dir)
+        os.makedirs(os.path.join(self.__cache_dir, str_to_md5(id) + '.' + archive_manager.ext), exist_ok=True)
+        self.assertRaises(XtremCacheArchiveCreationError, self.__cache_manager.cache, id, self.__dir_to_cache)
+        self.assertRaises(XtremCacheItemNotFound, self.__cache_manager.uncache, id, self.__dir_to_uncache)
 
 @ddt
 class TestCacheConcurrent(unittest.TestCase):
