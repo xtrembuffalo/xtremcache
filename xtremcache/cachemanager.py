@@ -102,16 +102,16 @@ class CacheManager():
 
     def __max_size_cleaning(self):
         bdd = self.__bdd_manager
-        all_sizes = bdd.get_all_values(self.__bdd_manager.Item.size)
+        all_sizes = bdd.get_all_values(bdd.Item.size)
+        all_sizes.append(bdd.size)
         if len(all_sizes):
             if sum(all_sizes) >= self.__max_size:
-                older = bdd.get_older(self.__bdd_manager.Item.created_date)
-                self.remove_item(older.id)
+                self.remove_item(bdd.older.id)
                 self.__max_size_cleaning()
 
     def clear_all(self):
         bdd = self.__bdd_manager
-        all_ids = bdd.get_all_values(self.__bdd_manager.Item.id)
+        all_ids = bdd.get_all_values(bdd.Item.id)
         for id in all_ids:
             self.remove_item(id)
 

@@ -151,7 +151,6 @@ class TestCacheConcurrent(unittest.TestCase):
             cache_manager.uncache(id, dir_to_uncache)
             dircmp_res = dircmp(dir_to_cache, dir_to_uncache)
             self.assertListEqual(dircmp_res.diff_files, [])
-
         for index in range(3):   
             with ThreadPoolExecutor() as executor:
                 executor.submit(exec_cache, self.__cache_dir, self.__dir_to_cache, id, index)
@@ -167,10 +166,42 @@ class TestCacheConcurrent(unittest.TestCase):
             cache_manager.uncache(id, dir_to_uncache)
             dircmp_res = dircmp(dir_to_cache, dir_to_uncache)
             self.assertListEqual(dircmp_res.diff_files, [])
-
         for index in range(3):   
             with ThreadPoolExecutor() as executor:
                 executor.submit(exec_cache, self.__cache_dir, self.__dir_to_cache, id, index)
 
+    def tearDown(self):
+        shutil.rmtree(self._temp_dir)
+
+@ddt
+class TestCacheCleanning(unittest.TestCase):
+    def setUp(self):
+        self._temp_dir = tempfile.mkdtemp()
+        self.__cache_dir = os.path.join(self._temp_dir, 'datas')
+        self.__data_base_dir = os.path.join(self._temp_dir, 'bdd')
+        self.__dir_to_cache = os.path.join(self._temp_dir, "dir_to_cache")
+        generate_dir_to_cache(self.__dir_to_cache)
+
+    @data(*get_id_data())
+    def test_max_size_cleaning(self, id):
+        def get_dir_size(start_path = '.'):
+            total_size = 0
+            for dirpath, dirnames, filenames in os.walk(start_path):
+                for f in filenames:
+                    fp = os.path.join(dirpath, f)
+                    if not os.path.islink(fp):
+                        total_size += os.path.getsize(fp)
+            return total_size
+
+        cache_manager = CacheManager(self.__cache_dir)
+        cache_manager.cache(id, self.__dir_to_cache)
+        bdd_manager = BddManager(self.__cache_dir)
+        item_size = bdd_manager.get(id).size
+        max_size = (item_size*3) + bdd_manager.size
+        cache_manager = CacheManager(self.__cache_dir, max_size)
+        for i in range(10):
+            cache_manager.cache(id + str(i), self.__dir_to_cache)
+            self.assertLessEqual(get_dir_size(self.__cache_dir), max_size)
+        
     def tearDown(self):
         shutil.rmtree(self._temp_dir)

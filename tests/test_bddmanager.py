@@ -58,7 +58,7 @@ class TestBddManager(unittest.TestCase):
 
     def test_get_older(self):
         item_list = populate(self.__bdd)
-        older = self.__bdd.get_older()
+        older = self.__bdd.older
         self.assertEqual(older, item_list[-1])
     
     def tearDown(self):

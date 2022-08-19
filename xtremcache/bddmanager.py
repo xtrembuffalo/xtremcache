@@ -26,6 +26,10 @@ class BddManager():
         return os.path.join(self.__data_base_dir, f"{get_app_name()}.db")
 
     @property
+    def size(self):
+        return os.path.getsize(self.__db_location)
+
+    @property
     @lru_cache
     def __sqlite_db_location(self):
         return f"sqlite:///{self.__db_location}"
@@ -161,7 +165,8 @@ class BddManager():
                 raise XtremCacheItemNotFound(e)
         return list(map(lambda v: v[0], values))
 
-    def get_older(self):
+    @property
+    def older(self):
         with Session(self.__engine) as session:
             try:
                 item = session.query(self.Item).order_by(self.Item.created_date.desc()).first()
