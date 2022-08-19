@@ -114,31 +114,27 @@ class BddManager():
         with Session(self.__engine) as session:
             try:
                 item_from_bdd = session.query(self.__Item).filter(self.__Item.id.in_([item.id])).one()
-            except NoResultFound as e:
-                raise XtremCacheItemNotFound(e)
-            else:
                 item_from_bdd.copy_from(item)
                 session.commit()
+            except Exception as e:
+                raise XtremCacheItemNotFound(e)
         
     def delete(self, id):
         with Session(self.__engine) as session:
             try:
                 session.query(self.__Item).filter(self.__Item.id.in_([id])).delete()
                 session.commit()
-                valid = True
-            except NoResultFound as e:
-                raise XtremCacheItemNotFound(e)
+            except Exception as e:
+                raise XtremCacheRemoveError(e)
 
     def delete_all(self):
-        valid = False
         with Session(self.__engine) as session:
             try:
                 session.query(self.__Item).delete()
                 session.commit()
-                valid = True
-            except:
+            except Exception as e:
                 session.rollback()
-        return valid
+                raise XtremCacheRemoveError(e)
 
     def get_all(self):
         items = []
@@ -146,7 +142,7 @@ class BddManager():
             try:
                 items = session.query(self.__Item).all()
             except Exception as e:
-                pass
+                raise XtremCacheItemNotFound(e)
         return items
 
     def get_all_values(self, key):

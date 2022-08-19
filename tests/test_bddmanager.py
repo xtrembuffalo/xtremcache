@@ -1,5 +1,6 @@
 import unittest
 import tempfile
+import shutil
 from ddt import ddt, data
 
 from xtremcache import *
@@ -49,6 +50,7 @@ class TestBddManager(unittest.TestCase):
             self.__bdd.delete_all()  
             for item in item_list:
                 self.assertRaises(XtremCacheItemNotFound, self.__bdd.get, item.id)
+            self.__bdd.create_item("AddAfterRemoving")
     
     def test_get_all_item(self):
         # Populate and get_all and repeat
@@ -64,4 +66,7 @@ class TestBddManager(unittest.TestCase):
             size_sum = sum(item.size for item in item_list)
             values_list_from_bdd = self.__bdd.get_all_values('size')
             self.assertTrue(size_sum, sum(values_list_from_bdd))
+    
+    def tearDown(self):
+        shutil.rmtree(self.__temp_dir)
 

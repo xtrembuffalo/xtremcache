@@ -38,6 +38,9 @@ class TestCacheDir(unittest.TestCase):
     def test_cache_non_existing_dir(self, id):
         self.assertRaises(XtremCacheItemNotFound, self.__cache_manager.uncache, id, self.__dir_to_uncache)
 
+    def tearDown(self):
+        shutil.rmtree(self._temp_dir)
+
 @ddt
 class TestCacheFile(unittest.TestCase):
     def setUp(self):
@@ -60,6 +63,9 @@ class TestCacheFile(unittest.TestCase):
     def test_cache_non_existing_file(self, id):
         self.assertRaises(XtremCacheFileNotFoundError, self.__cache_manager.cache, id, self.__file_to_cache  + "__")
         self.assertRaises(XtremCacheItemNotFound, self.__cache_manager.uncache, id, self._temp_dir)
+
+    def tearDown(self):
+        shutil.rmtree(self._temp_dir)
 
 @ddt
 class TestCacheGlobal(unittest.TestCase):
@@ -114,6 +120,9 @@ class TestCacheGlobal(unittest.TestCase):
         self.assertRaises(XtremCacheArchiveCreationError, self.__cache_manager.cache, id, self.__dir_to_cache)
         self.assertRaises(XtremCacheItemNotFound, self.__cache_manager.uncache, id, self.__dir_to_uncache)
 
+    def tearDown(self):
+        shutil.rmtree(self._temp_dir)
+
 @ddt
 class TestCacheConcurrent(unittest.TestCase):
     def setUp(self):
@@ -152,3 +161,6 @@ class TestCacheConcurrent(unittest.TestCase):
         for index in range(3):   
             with ThreadPoolExecutor() as executor:
                 executor.submit(exec_cache, self.__cache_dir, self.__dir_to_cache, id, index)
+
+    def tearDown(self):
+        shutil.rmtree(self._temp_dir)
