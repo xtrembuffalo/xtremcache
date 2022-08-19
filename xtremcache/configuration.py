@@ -7,7 +7,9 @@ from xtremcache.utils import *
 class ConfigurationFactory():
     """Create configuration object from file or dict, or the reverse."""
 
-    def __init__(self, config_file) -> None:
+    def __init__(
+        self,
+        config_file) -> None:
         self.__config_file = config_file
 
     def from_file(self):
@@ -16,7 +18,9 @@ class ConfigurationFactory():
         self.to_file(configuration)
         return configuration
 
-    def to_file(self, configuration):
+    def to_file(
+        self,
+        configuration):
         datas = ConfigurationFactory.create_datas_from_configuration(configuration)
         ConfigurationFactory.write_config_file(self.__config_file, datas)
 
@@ -46,7 +50,9 @@ class ConfigurationFactory():
                 datas[get_app_name()][p]=v
         return datas
 
-    def write_config_file(path, datas):
+    def write_config_file(
+        path,
+        datas):
         if os.path.isfile(path):
             os.remove(path)
         os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -74,7 +80,9 @@ class Configuration():
         return self.__max_size
 
     @max_size.setter
-    def max_size(self, max_size):
+    def max_size(
+        self,
+        max_size):
         self.__max_size = max_size
 
     def __repr__(self) -> str:

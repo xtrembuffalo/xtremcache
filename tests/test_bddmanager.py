@@ -51,21 +51,15 @@ class TestBddManager(unittest.TestCase):
             for item in item_list:
                 self.assertRaises(XtremCacheItemNotFound, self.__bdd.get, item.id)
             self.__bdd.create_item("AddAfterRemoving")
-    
-    def test_get_all_item(self):
-        # Populate and get_all and repeat
-        for i in range(3):
-            populate(self.__bdd)
-            for item in self.__bdd.get_all():
-                self.assertTrue(item == self.__bdd.get(item.id))
 
     def test_get_all_item_values(self):
-        # Populate and get_all and repeat
-        for i in range(3):
-            item_list = populate(self.__bdd)
-            size_sum = sum(item.size for item in item_list)
-            values_list_from_bdd = self.__bdd.get_all_values('size')
-            self.assertTrue(size_sum, sum(values_list_from_bdd))
+        size_sum = [item.size for item in populate(self.__bdd)]
+        self.assertTrue(sum(size_sum), sum(self.__bdd.get_all_values(self.__bdd.Item.size)))
+
+    def test_get_older(self):
+        item_list = populate(self.__bdd)
+        older = self.__bdd.get_older()
+        self.assertEqual(older, item_list[-1])
     
     def tearDown(self):
         shutil.rmtree(self.__temp_dir)

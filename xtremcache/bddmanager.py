@@ -1,11 +1,10 @@
 from ast import Delete
 import os
-import re
-import time
+import datetime
 from functools import lru_cache
 from sqlalchemy.orm import Session
 from sqlalchemy import Column
-from sqlalchemy import String, Integer, Boolean
+from sqlalchemy import String, Integer, Boolean, DateTime
 from sqlalchemy.orm import declarative_base, load_only
 from sqlalchemy import create_engine
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
@@ -16,7 +15,9 @@ from xtremcache.exceptions import *
 class BddManager():
     """Database to valid operations on cached files."""
 
-    def __init__(self, data_base_dir):
+    def __init__(
+        self,
+        data_base_dir):
         self.__data_base_dir = os.path.realpath(data_base_dir)
 
     @property
@@ -38,7 +39,7 @@ class BddManager():
 
     @property
     @lru_cache
-    def __Item(self):
+    def Item(self):
         self.__base = declarative_base()
         class Item(self.__base):
 
@@ -56,12 +57,17 @@ class BddManager():
             readers = Column(Integer, nullable=False)
             writer = Column(Boolean, nullable=False)
             archive_path = Column(String, nullable=False)
+            created_date = Column(DateTime, default=datetime.datetime.utcnow)
 
-            def copy_from(self, item):
+            def copy_from(
+                self,
+                item):
                 for m in self.data_members_name:
                     setattr(self, m, getattr(item, m, None))
 
-            def __eq__(self, other):
+            def __eq__(
+                self,
+                other):
                 for m in self.data_members_name:
                     if getattr(self, m, None) != getattr(other, m, None):
                         return False
@@ -88,41 +94,50 @@ class BddManager():
         writer:bool = False,
         archive_path:str = ''
         ):
-        return self.__Item(
+        return self.Item(
             id=id,
             size=size,
             readers=readers,
             writer=writer,
             archive_path=archive_path)
 
-    def get(self, id, create=False):
+    def get(
+        self,
+        id,
+        create=False):
         item = None
         with Session(self.__engine) as session:
             try:
-                item = session.query(self.__Item).filter(self.__Item.id.in_([id])).one()
+                item = session.query(self.Item).filter(self.Item.id.in_([id])).one()
             except NoResultFound as e:
                 if create:
-                    session.add(self.create_item(id=id, writer=True))
+                    session.add(self.create_item(
+                        id=id,
+                        writer=True))
                     session.commit()
                     return self.get(id)
                 else:
                     raise XtremCacheItemNotFound(e)
         return item
 
-    def update(self, item):
+    def update(
+        self,
+        item):
         item_from_bdd = self.get(item.id)
         with Session(self.__engine) as session:
             try:
-                item_from_bdd = session.query(self.__Item).filter(self.__Item.id.in_([item.id])).one()
+                item_from_bdd = session.query(self.Item).filter(self.Item.id.in_([item.id])).one()
                 item_from_bdd.copy_from(item)
                 session.commit()
             except Exception as e:
                 raise XtremCacheItemNotFound(e)
         
-    def delete(self, id):
+    def delete(
+        self,
+        id):
         with Session(self.__engine) as session:
             try:
-                session.query(self.__Item).filter(self.__Item.id.in_([id])).delete()
+                session.query(self.Item).filter(self.Item.id.in_([id])).delete()
                 session.commit()
             except Exception as e:
                 raise XtremCacheRemoveError(e)
@@ -130,23 +145,26 @@ class BddManager():
     def delete_all(self):
         with Session(self.__engine) as session:
             try:
-                session.query(self.__Item).delete()
+                session.query(self.Item).delete()
                 session.commit()
             except Exception as e:
                 session.rollback()
                 raise XtremCacheRemoveError(e)
 
-    def get_all(self):
-        items = []
+    def get_all_values(
+        self,
+        key):
         with Session(self.__engine) as session:
             try:
-                items = session.query(self.__Item).all()
+                values = session.query(key).all()
             except Exception as e:
                 raise XtremCacheItemNotFound(e)
-        return items
+        return list(map(lambda v: v[0], values))
 
-    def get_all_values(self, key):
-        return [ getattr(i, key, None) for i in self.get_all()]
-
-def create_bdd_manager(data_base_dir) -> BddManager:
-    return BddManager(data_base_dir)
+    def get_older(self):
+        with Session(self.__engine) as session:
+            try:
+                item = session.query(self.Item).order_by(self.Item.created_date.desc()).first()
+            except Exception as e:
+                raise XtremCacheItemNotFound(e)
+        return item

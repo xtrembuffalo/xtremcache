@@ -120,6 +120,16 @@ class TestCacheGlobal(unittest.TestCase):
         self.assertRaises(XtremCacheArchiveCreationError, self.__cache_manager.cache, id, self.__dir_to_cache)
         self.assertRaises(XtremCacheItemNotFound, self.__cache_manager.uncache, id, self.__dir_to_uncache)
 
+    @data(*get_id_data())
+    def test_clear_all(self, id):
+        for i in range(10):
+            self.__cache_manager.cache(id + str(i), self.__dir_to_cache)
+        self.__cache_manager.clear_all()
+        for i in range(10):
+            self.assertRaises(XtremCacheItemNotFound, self.__cache_manager.uncache, id + str(i), self.__dir_to_uncache)
+        filter  = os.path.join(self.__cache_dir, f"*.{create_archiver(self.__cache_dir).ext}")
+        self.assertListEqual(glob.glob(filter), [])
+
     def tearDown(self):
         shutil.rmtree(self._temp_dir)
 

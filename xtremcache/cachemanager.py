@@ -11,58 +11,135 @@ class CacheManager():
     """All actions to do when file or directory is cached or exit from the cache."""
 
     delay_time = 0.5
+    default_timeout = 60
 
-    def __init__(self, cache_dir, max_size=10000) -> None:
+    def __init__(
+        self,
+        cache_dir,
+        max_size=100000000) -> None: # 100 Go by defaut
         self.__cache_dir = cache_dir
         self.__max_size = max_size
         self.__archiver = create_archiver(self.__cache_dir)
         self.__bdd_manager = BddManager(cache_dir)
 
-    def cache(self, id, src_path, force=False, timeout=60*10):
-        timeout_exec(timeout, self.__cache, id, src_path, force)
-    
-    def uncache(self, id, dest_path, timeout=60*10):
-        timeout_exec(timeout, self.__uncache, id, dest_path)
-
-    def __cache(self, id, src_path, force):
-        bdd = self.__bdd_manager
-        try:
-            item = bdd.get(id)
-        except XtremCacheItemNotFound:
-            item = bdd.get(id, create=True)
+    def cache(
+        self,
+        id,
+        src_path,
+        force=False,
+        timeout=default_timeout):
+        def cache(
+            id,
+            src_path,
+            force):
+            bdd = self.__bdd_manager
+            cache_dir = self.__cache_dir
+            archiver = self.__archiver
             try:
-                archive_path = self.__archiver.archive(id, src_path)
-            except Exception as e:
-                bdd.delete(id)
-                raise e
-            else:
-                item.size = os.path.getsize(archive_path)
-                item.writer = False
-                item.archive_path = os.path.relpath(archive_path, self.__cache_dir)
-                bdd.update(item)
-        else:
-            if force:
-                if item.can_modifie:
-                    bdd.delete(id)
-                    self.__cache(id, src_path, False)
+                item = bdd.get(id)
+            except XtremCacheItemNotFound:
+                item = bdd.get(id, create=True)
+                try:
+                    archive_path = archiver.archive(id, src_path)
+                except Exception as e:
+                    item.writer = False
+                    bdd.update(item)
+                    self.remove_item(id)
+                    raise e
                 else:
-                    time.sleep(self.delay_time)
-                    raise FunctionRetry()
-    
-    def __uncache(self, id, dest_path):
-        bdd = self.__bdd_manager
-        item = bdd.get(id)
-        if item.can_read:
-            item.readers = item.readers + 1
-            bdd.update(item)
-            try:
-                self.__archiver.extract(id, dest_path)
-            except XtremCacheArchiveExtractionError as e:
-                bdd.delete(id)
-                raise XtremCacheArchiveExtractionError(e)
+                    item.size = os.path.getsize(archive_path)
+                    item.writer = False
+                    item.archive_path = os.path.relpath(archive_path, cache_dir)
+                    bdd.update(item)
             else:
-                item.readers = item.readers - 1
+                if force:
+                    self.remove_item(id)
+                    cache(
+                        id,
+                        src_path,
+                        False)
+            self.__max_size_cleaning()
+        timeout_exec(
+            timeout,
+            cache,
+            id,
+            src_path,
+            force
+        )
+    
+    def uncache(
+        self,
+        id, 
+        dest_path, 
+        timeout=default_timeout):
+        def uncache(
+            id,
+            dest_path):
+            bdd = self.__bdd_manager
+            archiver = self.__archiver
+            item = bdd.get(id)
+            if item.can_read:
+                item.readers = item.readers + 1
                 bdd.update(item)
-        else:
-            time.sleep(self.delay_time)
-            raise FunctionRetry()
+                try:
+                    archiver.extract(id, dest_path)
+                except XtremCacheArchiveExtractionError as e:
+                    item.readers = item.readers - 1
+                    bdd.update(item)
+                    self.remove_item(id)
+                    raise XtremCacheArchiveExtractionError(e)
+                else:
+                    item.readers = item.readers - 1
+                    bdd.update(item)
+            else:
+                time.sleep(self.delay_time)
+                raise FunctionRetry()
+        timeout_exec(
+            timeout,
+            uncache,
+            id,
+            dest_path)
+
+    def __max_size_cleaning(self):
+        bdd = self.__bdd_manager
+        all_sizes = bdd.get_all_values(self.__bdd_manager.Item.size)
+        if len(all_sizes):
+            if sum(all_sizes) >= self.__max_size:
+                older = bdd.get_older(self.__bdd_manager.Item.created_date)
+                self.remove_item(older.id)
+                self.__max_size_cleaning()
+
+    def clear_all(self):
+        bdd = self.__bdd_manager
+        all_ids = bdd.get_all_values(self.__bdd_manager.Item.id)
+        for id in all_ids:
+            self.remove_item(id)
+
+    def remove_item(
+        self,
+        id,
+        timeout=default_timeout):
+        def remove_item(id):
+            bdd = self.__bdd_manager
+            cache_dir = self.__cache_dir
+            item = bdd.get(id)
+            if item.can_modifie:
+                item.writer = True
+                bdd.update(item)
+                try:
+                    c_cwd = os.getcwd()
+                    os.makedirs(cache_dir, exist_ok=True)
+                    os.chdir(cache_dir)
+                    if item.archive_path and os.path.exists(item.archive_path):
+                        os.remove(item.archive_path)
+                    os.chdir(c_cwd)
+                except Exception as e:
+                    raise XtremCacheArchiveRemovingError(e)
+                bdd.delete(item.id)
+            else:
+                time.sleep(self.delay_time)
+                raise FunctionRetry()
+        timeout_exec(
+            timeout,
+            remove_item,
+            id)

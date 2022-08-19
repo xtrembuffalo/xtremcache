@@ -32,6 +32,9 @@ class XtremCacheArchiveExtractionError(XtremCacheArchive):
     """Impossible to find item in database."""
     pass
 
+class XtremCacheArchiveRemovingError(XtremCacheArchive):
+    """Impossible to find item in database."""
+    pass
 
 
 # --- Internal --- #
