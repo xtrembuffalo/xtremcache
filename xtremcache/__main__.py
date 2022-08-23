@@ -1,7 +1,7 @@
-from re import A
 import sys
 import os
 import argparse
+import inspect
 from pathlib import Path
 
 from xtremcache.configuration import ConfigurationFactory
@@ -16,6 +16,7 @@ class CommandRunner():
         self.__manager = manager
 
     def cache(self, args):
+        inspect.getargvalues(self.__manager.cache)
         self.__manager.cache(id = getattr(args, 'id', None),
                              path = getattr(args, 'path', None),
                              force = getattr(args, 'force', None))
@@ -25,7 +26,7 @@ class CommandRunner():
                                path = getattr(args, 'path', None))
 
 # Argument parser
-def get_args():
+def get_args(argv) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description='Local cache'
     )
@@ -76,9 +77,9 @@ def get_args():
         default=os.path.join(Path.home(), f".{get_app_name()}", 'config'),
         help='Max cache size (Mo).'
     )
-    return parser.parse_args()
+    return parser.parse_args(args=argv)
 
-def command_runnner(args, configuration):
+def command_runnner(args, configuration) -> None:
     command = getattr(args, 'command', None)
     if command:
         command_runner = CommandRunner(CacheManager(configuration.cache_dir, configuration.max_size))
@@ -86,16 +87,16 @@ def command_runnner(args, configuration):
         if attr is not None:
             attr(args)
 
-def run(args):
-    # Init configuration
-    configuration = ConfigurationFactory(args.config_file).from_file()
-    print(configuration)
-
-    # Command runner
-    command_runnner(args, configuration)
-
-def main():
-    return run(get_args())
+def main(argv) -> int:
+    try:
+        args = get_args(argv=argv)
+        command_runnner(
+            args,
+            ConfigurationFactory(args.config_file).from_file())
+    except XtremCacheException as e:
+        print(e)
+        return 1
+    return 0
 
 if __name__ == '__main__':
-    sys.exit(main())
+    sys.exit(main(sys.argv[1:]))

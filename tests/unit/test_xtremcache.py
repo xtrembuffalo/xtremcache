@@ -10,7 +10,7 @@ from ddt import ddt, data
 
 from xtremcache.cachemanager import CacheManager, BddManager
 from xtremcache.archiver import create_archiver
-from test_utils import *
+from tests.test_utils import *
 
 @ddt
 class TestCacheDir(unittest.TestCase):
@@ -36,7 +36,7 @@ class TestCacheDir(unittest.TestCase):
 
     @data(*get_id_data())
     def test_cache_non_existing_dir(self, id):
-        self.assertRaises(xtremcacheItemNotFound, self.__cache_manager.uncache, id, self.__dir_to_uncache)
+        self.assertRaises(XtremCacheItemNotFound, self.__cache_manager.uncache, id, self.__dir_to_uncache)
 
     def tearDown(self):
         shutil.rmtree(self._temp_dir)
@@ -61,8 +61,8 @@ class TestCacheFile(unittest.TestCase):
 
     @data(*get_id_data())
     def test_cache_non_existing_file(self, id):
-        self.assertRaises(xtremcacheFileNotFoundError, self.__cache_manager.cache, id, self.__file_to_cache  + "__")
-        self.assertRaises(xtremcacheItemNotFound, self.__cache_manager.uncache, id, self._temp_dir)
+        self.assertRaises(XtremCacheFileNotFoundError, self.__cache_manager.cache, id, self.__file_to_cache  + "__")
+        self.assertRaises(XtremCacheItemNotFound, self.__cache_manager.uncache, id, self._temp_dir)
 
     def tearDown(self):
         shutil.rmtree(self._temp_dir)
@@ -79,7 +79,7 @@ class TestCacheGlobal(unittest.TestCase):
 
     @data(*get_id_data())
     def test_uncache_non_existing_archive(self, id):
-        self.assertRaises(xtremcacheItemNotFound, self.__cache_manager.uncache, id, '.')
+        self.assertRaises(XtremCacheItemNotFound, self.__cache_manager.uncache, id, '.')
 
     @data(*get_id_data())
     def test_force_cache(self, id):
@@ -100,7 +100,7 @@ class TestCacheGlobal(unittest.TestCase):
         bdd_manager.update(item)
         start_time = time.time()
         timeout=2
-        self.assertRaises(xtremcacheTimeoutError, self.__cache_manager.uncache, id, self.__dir_to_uncache, timeout=timeout)
+        self.assertRaises(XtremCacheTimeoutError, self.__cache_manager.uncache, id, self.__dir_to_uncache, timeout=timeout)
         self.assertGreaterEqual(time.time() - start_time, timeout)
 
     @data(*get_id_data())
@@ -108,8 +108,8 @@ class TestCacheGlobal(unittest.TestCase):
         self.__cache_manager.cache(id, self.__dir_to_cache)
         filter  = os.path.join(self.__cache_dir, f"*.{create_archiver(self.__cache_dir).ext}")
         [os.remove(file) for file in glob.glob(filter)]
-        self.assertRaises(xtremcacheArchiveExtractionError, self.__cache_manager.uncache, id, self.__dir_to_uncache)
-        self.assertRaises(xtremcacheItemNotFound, self.__cache_manager.uncache, id, self.__dir_to_uncache)
+        self.assertRaises(XtremCacheArchiveExtractionError, self.__cache_manager.uncache, id, self.__dir_to_uncache)
+        self.assertRaises(XtremCacheItemNotFound, self.__cache_manager.uncache, id, self.__dir_to_uncache)
         self.__cache_manager.cache(id, self.__dir_to_cache)
         self.__cache_manager.uncache(id, self.__dir_to_uncache)
 
@@ -117,8 +117,8 @@ class TestCacheGlobal(unittest.TestCase):
     def test_archive_creation_error(self, id):
         archive_manager = create_archiver(self.__cache_dir)
         os.makedirs(os.path.join(self.__cache_dir, str_to_md5(id) + '.' + archive_manager.ext), exist_ok=True)
-        self.assertRaises(xtremcacheArchiveCreationError, self.__cache_manager.cache, id, self.__dir_to_cache)
-        self.assertRaises(xtremcacheItemNotFound, self.__cache_manager.uncache, id, self.__dir_to_uncache)
+        self.assertRaises(XtremCacheArchiveCreationError, self.__cache_manager.cache, id, self.__dir_to_cache)
+        self.assertRaises(XtremCacheItemNotFound, self.__cache_manager.uncache, id, self.__dir_to_uncache)
 
     @data(*get_id_data())
     def test_clear_all(self, id):
@@ -126,7 +126,7 @@ class TestCacheGlobal(unittest.TestCase):
             self.__cache_manager.cache(id + str(i), self.__dir_to_cache)
         self.__cache_manager.clear_all()
         for i in range(10):
-            self.assertRaises(xtremcacheItemNotFound, self.__cache_manager.uncache, id + str(i), self.__dir_to_uncache)
+            self.assertRaises(XtremCacheItemNotFound, self.__cache_manager.uncache, id + str(i), self.__dir_to_uncache)
         filter  = os.path.join(self.__cache_dir, f"*.{create_archiver(self.__cache_dir).ext}")
         self.assertListEqual(glob.glob(filter), [])
 
