@@ -3,7 +3,8 @@ import tempfile
 import shutil
 from ddt import ddt, data
 
-from xtremcache import *
+from xtremcache.bddmanager import *
+from xtremcache.exceptions import *
 from test_utils import *
 
 def populate(bdd):
@@ -36,12 +37,12 @@ class TestBddManager(unittest.TestCase):
 
     @data(*get_id_data())
     def test_read_nonexistent_item(self, id):
-        self.assertRaises(XtremCacheItemNotFound, self.__bdd.get, id)
+        self.assertRaises(xtremcacheItemNotFound, self.__bdd.get, id)
 
     @data(*get_id_data())
     def test_update_non_existing_item(self, id):
         item = self.__bdd.create_item(id)
-        self.assertRaises(XtremCacheItemNotFound, self.__bdd.update, item)
+        self.assertRaises(xtremcacheItemNotFound, self.__bdd.update, item)
 
     def test_clean_all_item(self):
         # Populate and clean and repeat
@@ -49,7 +50,7 @@ class TestBddManager(unittest.TestCase):
             item_list = populate(self.__bdd)
             self.__bdd.delete_all()  
             for item in item_list:
-                self.assertRaises(XtremCacheItemNotFound, self.__bdd.get, item.id)
+                self.assertRaises(xtremcacheItemNotFound, self.__bdd.get, item.id)
             self.__bdd.create_item("AddAfterRemoving")
 
     def test_get_all_item_values(self):
