@@ -38,11 +38,16 @@ def get_args(argv) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description='Local cache'
     )
+
     # Command
-    sub_parsers = parser.add_subparsers(help="subparsers", dest='command')
+    sub_parsers = parser.add_subparsers(
+        help="subparsers",
+        dest='command')
 
     # Cache
-    cache_parser = sub_parsers.add_parser('cache', help='Put in cache.')
+    cache_parser = sub_parsers.add_parser(
+        'cache',
+        help='Put in cache.')
     cache_parser.add_argument(
         '--id',
         '-i',
@@ -63,7 +68,9 @@ def get_args(argv) -> argparse.Namespace:
     )
 
     # Uncache
-    uncache_parser = sub_parsers.add_parser('uncache', help='Put in cache')
+    uncache_parser = sub_parsers.add_parser(
+        'uncache',
+        help='Put in cache')
     uncache_parser.add_argument(
         '--id',
         '-i',
@@ -77,8 +84,27 @@ def get_args(argv) -> argparse.Namespace:
         help='Cache destination.'
     )
 
+    # Remove one
+    remove_parser = sub_parsers.add_parser(
+        'remove',
+        help='Remove one item.')
+    remove_parser.add_argument(
+        '--id',
+        '-i',
+        type=str,
+        default=None,
+        help='UUID'
+    )
+
+    # Remove all
+    sub_parsers.add_parser(
+        'remove_all',
+        help='Remove all database and cached files.')
+
     # Config
-    config_parser = sub_parsers.add_parser('config', help='Configuation.')
+    config_parser = sub_parsers.add_parser(
+        'config',
+        help='Configuation.')
     config_parser.add_argument(
         '--cache-dir',
         '-c',

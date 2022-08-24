@@ -117,24 +117,24 @@ class TestCacheGlobal(unittest.TestCase):
         self.assertRaises(XtremCacheItemNotFound, self.__cache_manager.uncache, id, self.__dir_to_uncache)
 
     @data(*get_id_data())
-    def test_clear_all(self, id):
+    def test_remove_all(self, id):
         for i in range(3):
             self.__cache_manager.cache(id + str(i), self.__dir_to_cache)
-        self.__cache_manager.clear_all()
+        self.__cache_manager.remove_all()
         for i in range(3):
             self.assertRaises(XtremCacheItemNotFound, self.__cache_manager.uncache, id + str(i), self.__dir_to_uncache)
         filter  = os.path.join(self.__cache_dir, f"*.{create_archiver(self.__cache_dir).ext}")
         self.assertListEqual(glob.glob(filter), [])
 
     @data(*get_id_data())
-    def test_remove_one(self, id):
+    def test_remove(self, id):
         laps = 4
         for i in range(laps):
             self.__cache_manager.cache(id + str(i), self.__dir_to_cache)
         for i in range(laps):
             removed_id = id + str(i)
             still_exists_id = id + str(i+1)
-            self.__cache_manager.remove_item(removed_id)
+            self.__cache_manager.remove(removed_id)
             self.assertRaises(XtremCacheItemNotFound, self.__cache_manager.uncache, removed_id, self.__dir_to_uncache)
             if i < laps-1: self.__cache_manager.uncache(still_exists_id, self.__dir_to_uncache)
 

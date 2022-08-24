@@ -44,7 +44,7 @@ class CacheManager():
                 except Exception as e:
                     item.writer = False
                     bdd.update(item)
-                    self.remove_item(id)
+                    self.remove(id)
                     raise e
                 else:
                     item.size = os.path.getsize(archive_path)
@@ -54,7 +54,7 @@ class CacheManager():
                     self.__max_size_cleaning()
             else:
                 if force:
-                    self.remove_item(id)
+                    self.remove(id)
                     cache(
                         id,
                         path,
@@ -89,7 +89,7 @@ class CacheManager():
                 except XtremCacheArchiveExtractionError as e:
                     item.readers = item.readers - 1
                     bdd.update(item)
-                    self.remove_item(id)
+                    self.remove(id)
                     raise XtremCacheArchiveExtractionError(e)
                 else:
                     item.readers = item.readers - 1
@@ -109,20 +109,21 @@ class CacheManager():
         all_sizes.append(bdd.size)
         if len(all_sizes):
             if sum(all_sizes) >= self.__max_size:
-                self.remove_item(bdd.older.id)
+                self.remove(bdd.older.id)
                 self.__max_size_cleaning()
 
-    def clear_all(self):
+    def remove_all(
+        self,
+        timeout=default_timeout):
         bdd = self.__bdd_manager
-        all_ids = bdd.get_all_values(bdd.Item.id)
-        for id in all_ids:
-            self.remove_item(id)
+        for id in bdd.get_all_values(bdd.Item.id):
+            self.remove(id, timeout)
 
-    def remove_item(
+    def remove(
         self,
         id,
         timeout=default_timeout):
-        def remove_item(id):
+        def remove(id):
             bdd = self.__bdd_manager
             cache_dir = self.__cache_dir
             item = bdd.get(id)
@@ -144,5 +145,5 @@ class CacheManager():
                 raise FunctionRetry()
         timeout_exec(
             timeout,
-            remove_item,
+            remove,
             id)

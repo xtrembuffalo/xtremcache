@@ -81,5 +81,48 @@ class TestXtremcache(unittest.TestCase):
                 self.__dir_to_cache
             ), i)
 
+    @data(*get_id_data())
+    def test_remove_command(self, id):
+        self.assertEqual(self.xtremcache(
+            'config',
+            '--cache-dir', self.__cache_dir,
+            '--max-size', str(DEFAULT_TESTS_MAX_SIZE)
+        ), 0)
+        self.assertEqual(self.xtremcache(
+            'cache',
+            '--id', id,
+            self.__dir_to_cache
+        ), 0)
+        self.assertEqual(self.xtremcache(
+            'remove',
+            '--id', id
+        ), 0)
+        self.assertEqual(self.xtremcache(
+            'uncache',
+            '--id', id,
+            self.__dir_to_uncache
+        ), 1)
+
+    @data(*get_id_data())
+    def test_remove_all_command(self, id):
+        self.assertEqual(self.xtremcache(
+            'config',
+            '--cache-dir', self.__cache_dir,
+            '--max-size', str(DEFAULT_TESTS_MAX_SIZE)
+        ), 0)
+        for i in range(2):
+            self.assertEqual(self.xtremcache(
+                'cache',
+                '--id', id + str(i),
+                self.__dir_to_cache
+            ), 0)
+        self.assertEqual(self.xtremcache('remove_all'
+        ), 0)
+        for i in range(2):
+            self.assertEqual(self.xtremcache(
+                'uncache',
+                '--id', id + str(i),
+                self.__dir_to_uncache
+            ), 1)
     def tearDown(self):
         shutil.rmtree(self._temp_dir)
