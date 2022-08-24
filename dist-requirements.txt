@@ -1,4 +1,4 @@
 build
 twine
-yaml==6.0
+PyYAML==6.0
 SQLAlchemy==1.4.35
