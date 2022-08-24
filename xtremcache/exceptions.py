@@ -8,6 +8,10 @@ class XtremCacheItemNotFound(XtremCacheException):
     """Impossible to find item in database."""
     pass
 
+class XtremCacheAlreadyCached(XtremCacheException):
+    """Impossible to find item in database."""
+    pass
+
 class XtremCacheRemoveError(XtremCacheException):
     """Impossible to find item in database."""
     pass

@@ -51,6 +51,7 @@ class CacheManager():
                     item.writer = False
                     item.archive_path = os.path.relpath(archive_path, cache_dir)
                     bdd.update(item)
+                    self.__max_size_cleaning()
             else:
                 if force:
                     self.remove_item(id)
@@ -58,7 +59,9 @@ class CacheManager():
                         id,
                         path,
                         False)
-            self.__max_size_cleaning()
+                else:
+                    raise XtremCacheAlreadyCached()
+            
         timeout_exec(
             timeout,
             cache,

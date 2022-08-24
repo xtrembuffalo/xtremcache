@@ -6,7 +6,7 @@ from ddt import ddt, data
 from xtremcache.main import main
 from tests.test_utils import *
 
-DEFAULT_MAX_SIZE=1000000
+DEFAULT_TESTS_MAX_SIZE=1000000
 
 @ddt
 class TestXtremcache(unittest.TestCase):
@@ -26,21 +26,46 @@ class TestXtremcache(unittest.TestCase):
         self.assertEqual(self.xtremcache(
             'config',
             '--cache-dir', self.__cache_dir,
-            '--max-size', str(DEFAULT_MAX_SIZE)
+            '--max-size', str(DEFAULT_TESTS_MAX_SIZE)
         ), 0)
-
         self.assertEqual(self.xtremcache(
             'cache',
             '--id', id,
             self.__dir_to_cache
         ), 0)
-
         self.assertEqual(self.xtremcache(
             'uncache',
             '--id', id,
             self.__dir_to_uncache
         ), 0)
         self.assertTrue(dircmp(self.__dir_to_uncache, self.__dir_to_cache))
+
+    @data(*get_id_data())
+    def test_uncache_failed_command(self, id):
+        self.assertEqual(self.xtremcache(
+            'config',
+            '--cache-dir', self.__cache_dir,
+            '--max-size', str(DEFAULT_TESTS_MAX_SIZE)
+        ), 0)
+        self.assertEqual(self.xtremcache(
+            'uncache',
+            '--id', id,
+            self.__dir_to_uncache
+        ), 1)
+
+    @data(*get_id_data())
+    def test_cache_failed_command(self, id):
+        self.assertEqual(self.xtremcache(
+            'config',
+            '--cache-dir', self.__cache_dir,
+            '--max-size', str(DEFAULT_TESTS_MAX_SIZE)
+        ), 0)
+        for i in range(2):
+            self.assertEqual(self.xtremcache(
+                'cache',
+                '--id', id,
+                self.__dir_to_cache
+            ), i)
 
     def tearDown(self):
         shutil.rmtree(self._temp_dir)
