@@ -33,6 +33,6 @@ def timeout_exec(timeout, fn, *args, **kwargs):
         try:
             return fn(*args, **kwargs)
         except FunctionRetry as e:
-            if (time.time() - start_time) > timeout:
+            if timeout and (time.time() - start_time) > timeout:
                 retry = False
                 raise XtremCacheTimeoutError(e)

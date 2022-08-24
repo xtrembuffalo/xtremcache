@@ -12,9 +12,9 @@ class ConfigurationFactory():
         config_file) -> None:
         self.__config_file = config_file
 
-    def from_file(self):
+    def from_file(self, args):
         datas = ConfigurationFactory.read_config_file(self.__config_file)
-        configuration = ConfigurationFactory.create_configuration_from_datas(datas)
+        configuration = ConfigurationFactory.create_configuration_from_datas(datas, args)
         self.to_file(configuration)
         return configuration
 
@@ -24,11 +24,11 @@ class ConfigurationFactory():
         datas = ConfigurationFactory.create_datas_from_configuration(configuration)
         ConfigurationFactory.write_config_file(self.__config_file, datas)
 
-    def create_configuration_from_datas(datas):
+    def create_configuration_from_datas(datas, args=None):
         configuration = Configuration()
-        if datas:
+        if datas or args:
             for p in get_public_props(configuration):
-                v = datas.get(p, None)
+                v = getattr(args, p, datas.get(p, None))
                 if v is not None:
                     setattr(configuration, p, v)
         return configuration

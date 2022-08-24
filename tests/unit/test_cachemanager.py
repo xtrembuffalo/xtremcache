@@ -5,19 +5,20 @@ import tempfile
 import os
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-from filecmp import dircmp
 from ddt import ddt, data
 
 from xtremcache.cachemanager import CacheManager, BddManager
-from xtremcache.archiver import create_archiver
+from xtremcache.archivermanager import create_archiver
 from tests.test_utils import *
+
+DEFAULT_MAX_SIZE=1000000
 
 @ddt
 class TestCacheDir(unittest.TestCase):
     def setUp(self):
         self._temp_dir = tempfile.mkdtemp()
         self.__cache_dir = os.path.join(self._temp_dir, 'datas')
-        self.__cache_manager = CacheManager(self.__cache_dir)
+        self.__cache_manager = CacheManager(self.__cache_dir, DEFAULT_MAX_SIZE)
         self.__dir_to_cache = os.path.join(self._temp_dir, "dir_to_cache")
         generate_dir_to_cache(self.__dir_to_cache)
         self.__dir_to_uncache = os.path.join(self._temp_dir, "dir_to_uncache")
@@ -26,13 +27,7 @@ class TestCacheDir(unittest.TestCase):
     def test_cache_dir(self, id):
         self.__cache_manager.cache(id, self.__dir_to_cache)
         self.__cache_manager.uncache(id, self.__dir_to_uncache)
-        dircmp_res = dircmp(self.__dir_to_uncache, self.__dir_to_cache)
-        self.assertListEqual(dircmp_res.diff_files, [])
-        if isUnix():
-            symlink = glob.glob(os.path.join(self.__dir_to_uncache, '**', '*_symlink.txt'), recursive=True)
-            self.assertNotEqual(symlink, [])
-            for f in symlink:
-                self.assertTrue(os.path.islink(f))
+        self.assertTrue(dircmp(self.__dir_to_uncache, self.__dir_to_cache))
 
     @data(*get_id_data())
     def test_cache_non_existing_dir(self, id):
@@ -47,7 +42,7 @@ class TestCacheFile(unittest.TestCase):
         self.__file_content = f"Content of file"
         self._temp_dir = tempfile.mkdtemp()
         self.__cache_dir = os.path.join(self._temp_dir, 'datas')
-        self.__cache_manager = CacheManager(self.__cache_dir)
+        self.__cache_manager = CacheManager(self.__cache_dir, DEFAULT_MAX_SIZE)
         self.__file_to_cache = os.path.join(self._temp_dir, "file_to_cache.txt")
         with open(self.__file_to_cache, 'a') as f:
             f.write(self.__file_content)
@@ -72,7 +67,7 @@ class TestCacheGlobal(unittest.TestCase):
     def setUp(self):
         self._temp_dir = tempfile.mkdtemp()
         self.__cache_dir = os.path.join(self._temp_dir, 'datas')
-        self.__cache_manager = CacheManager(self.__cache_dir)
+        self.__cache_manager = CacheManager(self.__cache_dir, DEFAULT_MAX_SIZE)
         self.__dir_to_cache = os.path.join(self._temp_dir, "dir_to_cache")
         generate_dir_to_cache(self.__dir_to_cache)
         self.__dir_to_uncache = os.path.join(self._temp_dir, "dir_to_uncache")
@@ -88,8 +83,7 @@ class TestCacheGlobal(unittest.TestCase):
         generate_dir_to_cache(self.__dir_to_cache)
         self.__cache_manager.cache(id, self.__dir_to_cache, force=True)
         self.__cache_manager.uncache(id, self.__dir_to_uncache)
-        dircmp_res = dircmp(self.__dir_to_uncache, self.__dir_to_cache)
-        self.assertListEqual(dircmp_res.diff_files, [])
+        self.assertTrue(dircmp(self.__dir_to_uncache, self.__dir_to_cache))
 
     @data(*get_id_data())
     def test_timeout(self, id):
@@ -112,6 +106,7 @@ class TestCacheGlobal(unittest.TestCase):
         self.assertRaises(XtremCacheItemNotFound, self.__cache_manager.uncache, id, self.__dir_to_uncache)
         self.__cache_manager.cache(id, self.__dir_to_cache)
         self.__cache_manager.uncache(id, self.__dir_to_uncache)
+        self.assertTrue(dircmp(self.__dir_to_uncache, self.__dir_to_cache))
 
     @data(*get_id_data())
     def test_archive_creation_error(self, id):
@@ -144,13 +139,12 @@ class TestCacheConcurrent(unittest.TestCase):
     @data(*get_id_data())
     def test_concurrent_same_id(self, id):
         def exec_cache(cache_dir, dir_to_cache, id, index):
-            cache_manager = CacheManager(cache_dir)
+            cache_manager = CacheManager(cache_dir, DEFAULT_MAX_SIZE)
             cache_manager.cache(id, dir_to_cache)
             dir_to_uncache = os.path.join(self._temp_dir, f"dir_to_uncache_{index}")
             os.makedirs(dir_to_uncache)
             cache_manager.uncache(id, dir_to_uncache)
-            dircmp_res = dircmp(dir_to_cache, dir_to_uncache)
-            self.assertListEqual(dircmp_res.diff_files, [])
+            self.assertTrue(dircmp(dir_to_uncache, self.__dir_to_cache))
         for index in range(3):   
             with ThreadPoolExecutor() as executor:
                 executor.submit(exec_cache, self.__cache_dir, self.__dir_to_cache, id, index)
@@ -159,13 +153,12 @@ class TestCacheConcurrent(unittest.TestCase):
     def test_concurrent(self, id):
         def exec_cache(cache_dir, dir_to_cache, id, index):
             id = id + f'{index}'
-            cache_manager = CacheManager(cache_dir)
+            cache_manager = CacheManager(cache_dir, DEFAULT_MAX_SIZE)
             cache_manager.cache(id + f'{index}', dir_to_cache)
             dir_to_uncache = os.path.join(self._temp_dir, f"dir_to_uncache_{index}")
             os.makedirs(dir_to_uncache)
             cache_manager.uncache(id, dir_to_uncache)
-            dircmp_res = dircmp(dir_to_cache, dir_to_uncache)
-            self.assertListEqual(dircmp_res.diff_files, [])
+            self.assertTrue(dircmp(dir_to_uncache, self.__dir_to_cache))
         for index in range(3):   
             with ThreadPoolExecutor() as executor:
                 executor.submit(exec_cache, self.__cache_dir, self.__dir_to_cache, id, index)
@@ -178,7 +171,6 @@ class TestCacheCleanning(unittest.TestCase):
     def setUp(self):
         self._temp_dir = tempfile.mkdtemp()
         self.__cache_dir = os.path.join(self._temp_dir, 'datas')
-        self.__data_base_dir = os.path.join(self._temp_dir, 'bdd')
         self.__dir_to_cache = os.path.join(self._temp_dir, "dir_to_cache")
         generate_dir_to_cache(self.__dir_to_cache)
 
@@ -193,7 +185,7 @@ class TestCacheCleanning(unittest.TestCase):
                         total_size += os.path.getsize(fp)
             return total_size
 
-        cache_manager = CacheManager(self.__cache_dir)
+        cache_manager = CacheManager(self.__cache_dir, DEFAULT_MAX_SIZE)
         cache_manager.cache(id, self.__dir_to_cache)
         bdd_manager = BddManager(self.__cache_dir)
         item_size = bdd_manager.get(id).size

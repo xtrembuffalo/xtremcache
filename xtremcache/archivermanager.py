@@ -31,30 +31,30 @@ class ArchiveManager():
     def id_to_archive_path(self, id):
         return os.path.join(self._cache_dir, self.id_to_filename(id))
 
-    def archive(self, id, src_path):
+    def archive(self, id, path):
         archive_path = self.id_to_archive_path(id)
-        if not os.path.exists(src_path):
-            raise XtremCacheFileNotFoundError(src_path)
+        if not os.path.exists(path):
+            raise XtremCacheFileNotFoundError(path)
         try:
+            root_dir = os.path.realpath(path if os.path.isdir(path) else os.path.dirname(path))
             shutil.make_archive(
                 base_name=remove_file_extention(archive_path),
                 format=self.format,
-                root_dir=os.path.dirname(src_path),
-                base_dir=os.path.basename(src_path))
+                root_dir=root_dir,
+                base_dir='.')
         except Exception as e:
             raise XtremCacheArchiveCreationError(e)
         return archive_path
 
-    def extract(self, id, dest_path):
+    def extract(self, id, path):
         archive_path = self.id_to_archive_path(id)
         try:
-            if not os.path.exists(dest_path):
-                os.makedirs(dest_path, exist_ok=True)
+            if not os.path.exists(path):
+                os.makedirs(path, exist_ok=True)
             shutil.unpack_archive(
                 filename=archive_path,
-                extract_dir=dest_path,
+                extract_dir=path,
                 format=self.format)
-            rt = True
         except Exception as e:
             raise XtremCacheArchiveExtractionError(e)
 

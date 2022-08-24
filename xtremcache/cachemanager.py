@@ -3,7 +3,7 @@ import logging
 import time
 from typing import final
 
-from xtremcache.archiver import create_archiver
+from xtremcache.archivermanager import create_archiver
 from xtremcache.bddmanager import BddManager
 from xtremcache.utils import *
 
@@ -16,7 +16,7 @@ class CacheManager():
     def __init__(
         self,
         cache_dir,
-        max_size=100000000) -> None: # 100 Go by defaut
+        max_size) -> None:
         self.__cache_dir = cache_dir
         self.__max_size = max_size
         self.__archiver = create_archiver(self.__cache_dir)
@@ -25,12 +25,12 @@ class CacheManager():
     def cache(
         self,
         id,
-        src_path,
+        path,
         force=False,
         timeout=default_timeout):
         def cache(
             id,
-            src_path,
+            path,
             force):
             bdd = self.__bdd_manager
             cache_dir = self.__cache_dir
@@ -40,7 +40,7 @@ class CacheManager():
             except XtremCacheItemNotFound:
                 item = bdd.get(id, create=True)
                 try:
-                    archive_path = archiver.archive(id, src_path)
+                    archive_path = archiver.archive(id, path)
                 except Exception as e:
                     item.writer = False
                     bdd.update(item)
@@ -56,25 +56,25 @@ class CacheManager():
                     self.remove_item(id)
                     cache(
                         id,
-                        src_path,
+                        path,
                         False)
             self.__max_size_cleaning()
         timeout_exec(
             timeout,
             cache,
             id,
-            src_path,
+            path,
             force
         )
     
     def uncache(
         self,
         id, 
-        dest_path, 
+        path, 
         timeout=default_timeout):
         def uncache(
             id,
-            dest_path):
+            path):
             bdd = self.__bdd_manager
             archiver = self.__archiver
             item = bdd.get(id)
@@ -82,7 +82,7 @@ class CacheManager():
                 item.readers = item.readers + 1
                 bdd.update(item)
                 try:
-                    archiver.extract(id, dest_path)
+                    archiver.extract(id, path)
                 except XtremCacheArchiveExtractionError as e:
                     item.readers = item.readers - 1
                     bdd.update(item)
@@ -98,7 +98,7 @@ class CacheManager():
             timeout,
             uncache,
             id,
-            dest_path)
+            path)
 
     def __max_size_cleaning(self):
         bdd = self.__bdd_manager
