@@ -1,6 +1,8 @@
 import unittest
 import tempfile
 import shutil
+from webbrowser import get
+import yaml
 from ddt import ddt, data
 
 from xtremcache.main import main
@@ -20,6 +22,18 @@ class TestXtremcache(unittest.TestCase):
 
     def xtremcache(self, *args):
         return main(['--config-file', self.__config_file] + list(args))
+
+    def test_configuration(self):
+        self.assertEqual(self.xtremcache(
+            'config',
+            '--cache-dir', self.__cache_dir,
+            '--max-size', str(DEFAULT_TESTS_MAX_SIZE)
+        ), 0)
+        self.assertTrue(os.path.isfile(self.__config_file))
+        with open(self.__config_file, 'r') as f:
+            datas = yaml.safe_load(f)
+        self.assertEqual(datas[get_app_name()]['cache_dir'], self.__cache_dir)
+        self.assertEqual(datas[get_app_name()]['max_size'], DEFAULT_TESTS_MAX_SIZE)
 
     @data(*get_id_data())
     def test_cache_uncache_command(self, id):
