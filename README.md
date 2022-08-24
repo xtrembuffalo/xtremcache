@@ -1,33 +1,108 @@
 # xtremcache
 
-`xtremcache` is a Python package dedicated to handle generic file caching.
+`xtremcache` is a Python package dedicated to handle generic file and directories caching.
 
 ## Installation
 
 `xtremcache` is available on [PyPi](https://pypi.org/project/xtremcache/).
-
-# Contributions
 
 ## Tests
 
 Tests are written following `unittest` framework. Some dependencies are needed (`test-requirements.txt`). If you want to run tests, enter the following command at the root level of the package:
 
 ```bash
-python -m unittest discover
+python -m unittest discover -s tests # All tests
+python -m unittest discover -s tests/unit # Unit tests
+python -m unittest discover -s tests/integration # Integration tests
 ```
 
-## Build the project
+## Module usage
 
-To perform the build, you need to install `dist-requirements.txt` list of packages, then run the following command. All the files will be located in `dist` directory.
+### Cache and uncache example
 
-```bash
-python -m build
+- Create CacheManager with data location and the maximum size of this cache directory
+- Cache a directory with unique id to find it lather
+- Uncache with unique id to a specifique directory
+
+```python
+from xtremcache.cachemanager import CacheManager
+
+cache_manager = CacheManager(
+    cache_dir='/tmp/xtremcache',
+    max_size=1000000
+    )
+cache_manager.cache(
+    id='UUID',
+    path='/tmp/dir_to_cache'
+    )
+cache_manager.uncache(
+    id='UUID',
+    path='/tmp/destination_dir'
+    )
 ```
 
-## Upload the project
+### Override cached example
 
-The project can be uploaded using twine (listed in `dist-requirements.txt`) by running the following command:
+- Create CacheManager with data location and the maximum size of this cache directory
+- Cache a directory with unique id to find it lather
+- Override last unique id to a new directory
 
-```bash
-python -m twine upload dist/*
+```python
+from xtremcache.cachemanager import CacheManager
+
+cache_manager = CacheManager(
+    cache_dir='/tmp/xtremcache',
+    max_size=1000000
+    )
+cache_manager.cache(
+    id='UUID',
+    path='/tmp/dir_to_cache'
+    )
+cache_manager.cache(
+    id='UUID',
+    path='/tmp/new_dir_to_cache',
+    force=True
+    )
+```
+
+### Cache and clean example
+
+- Create CacheManager with data location and the maximum size of this cache directory
+- Cache a directory with unique id to find it lather
+- Remove chached file
+
+```python
+from xtremcache.cachemanager import CacheManager
+
+cache_manager = CacheManager(
+    cache_dir='/tmp/xtremcache',
+    max_size=1000000
+    )
+cache_manager.cache(
+    id='UUID',
+    path='/tmp/dir_to_cache'
+    )
+cache_manager.remove(
+    id='UUID'
+    )
+```
+
+### Cache and clean all example
+
+- Create CacheManager with data location and the maximum size of this cache directory
+- Cache a directory with unique id to find it lather
+- Remove all chached files
+
+```python
+from xtremcache.cachemanager import CacheManager
+
+cache_manager = CacheManager(
+    cache_dir='/tmp/xtremcache',
+    max_size=1000000
+    )
+cache_manager.cache(
+    id='UUID',
+    path='/tmp/dir_to_cache'
+    )
+cache_manager.remove_all()
 ```
