@@ -52,7 +52,7 @@ def get_ws_name(){
 /**
 * xtreamcache unit tests
 */
-def unit_tests_step(){
+def tests_step(def type){
     printenv()
     mkdir("tmp")
     mkdir("sources")
@@ -69,11 +69,12 @@ def unit_tests_step(){
             withEnv(["PATH=${append_in_variable(env.PATH, get_python_venv_root())}"]) {
                 sh_bat "python -m pip install -r dist-requirements.txt"
                 sh_bat "python -m pip install -r test-requirements.txt"
-                sh_bat "python -m xmlrunner discover tests --output-file ${junit_results}"
+                sh_bat "python -m xmlrunner discover tests/${type} --output-file ${junit_results}"
             }
         }
     }
 }
+
 
 /**
 * Checkout xtremcache sources
@@ -126,7 +127,7 @@ pipeline {
                 }
             }
         }
-        stage("Unit tests") {
+        stage("Tests") {
             parallel{
                 stage("Windows") {
                     stages {
@@ -144,7 +145,7 @@ pipeline {
                             }
                             steps {
                                 script{
-                                    unit_tests_step()
+                                    tests_step('unit')
                                 }
                             }
                             post {
@@ -153,6 +154,32 @@ pipeline {
                                         junit "*.junit"
                                         ensure_delete_workspace()
                                     }
+                                }
+                            }
+                        }
+                    }
+                    stage("Windows integration tests"){
+                        agent {
+                            node {
+                                label AGENT_LABEL_EXTRAS_WIN
+                                customWorkspace "workspace/xrm_${get_ws_name()}_it_${env.BUILD_NUMBER}"
+                            }
+                        }
+                        environment{
+                            TMP = to_native_separators("${env.WORKSPACE}/tmp")
+                            TEMP = to_native_separators("${env.WORKSPACE}/tmp")
+                            TMPDIR = to_native_separators("${env.WORKSPACE}/tmp")
+                        }
+                        steps {
+                            script{
+                                tests_step('integration')
+                            }
+                        }
+                        post {
+                            success {
+                                script{
+                                    junit "*.junit"
+                                    ensure_delete_workspace()
                                 }
                             }
                         }
@@ -174,7 +201,33 @@ pipeline {
                             }
                             steps {
                                 script{
-                                    unit_tests_step()
+                                    tests_step('unit')
+                                }
+                            }
+                            post {
+                                success {
+                                    script{
+                                        junit "*.junit"
+                                        ensure_delete_workspace()
+                                    }
+                                }
+                            }
+                        }
+                        stage("Linux integration tests"){
+                            agent {
+                                node {
+                                    label AGENT_LABEL_EXTRAS_LNX
+                                    customWorkspace "workspace/xrm_${get_ws_name()}_it_${env.BUILD_NUMBER}"
+                                }
+                            }
+                            environment{
+                                TMP = to_native_separators("${env.WORKSPACE}/tmp")
+                                TEMP = to_native_separators("${env.WORKSPACE}/tmp")
+                                TMPDIR = to_native_separators("${env.WORKSPACE}/tmp")
+                            }
+                            steps {
+                                script{
+                                    tests_step('integration')
                                 }
                             }
                             post {
