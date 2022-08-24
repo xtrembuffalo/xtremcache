@@ -128,7 +128,7 @@ pipeline {
             }
         }
         stage("Tests") {
-            parallel{
+            parallel {
                 stage("Windows") {
                     stages {
                         stage("Windows unit tests"){
@@ -157,29 +157,29 @@ pipeline {
                                 }
                             }
                         }
-                    }
-                    stage("Windows integration tests"){
-                        agent {
-                            node {
-                                label AGENT_LABEL_EXTRAS_WIN
-                                customWorkspace "workspace/xrm_${get_ws_name()}_it_${env.BUILD_NUMBER}"
+                        stage("Windows integration tests"){
+                            agent {
+                                node {
+                                    label AGENT_LABEL_EXTRAS_WIN
+                                    customWorkspace "workspace/xrm_${get_ws_name()}_it_${env.BUILD_NUMBER}"
+                                }
                             }
-                        }
-                        environment{
-                            TMP = to_native_separators("${env.WORKSPACE}/tmp")
-                            TEMP = to_native_separators("${env.WORKSPACE}/tmp")
-                            TMPDIR = to_native_separators("${env.WORKSPACE}/tmp")
-                        }
-                        steps {
-                            script{
-                                tests_step('integration')
+                            environment{
+                                TMP = to_native_separators("${env.WORKSPACE}/tmp")
+                                TEMP = to_native_separators("${env.WORKSPACE}/tmp")
+                                TMPDIR = to_native_separators("${env.WORKSPACE}/tmp")
                             }
-                        }
-                        post {
-                            success {
+                            steps {
                                 script{
-                                    junit "*.junit"
-                                    ensure_delete_workspace()
+                                    tests_step('integration')
+                                }
+                            }
+                            post {
+                                success {
+                                    script{
+                                        junit "*.junit"
+                                        ensure_delete_workspace()
+                                    }
                                 }
                             }
                         }
