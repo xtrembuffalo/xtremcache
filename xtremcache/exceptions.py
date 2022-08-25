@@ -1,7 +1,7 @@
 # --- Global --- #
 
 class XtremCacheException(Exception):
-    """Application exceptions."""
+    """All XtremCache exceptions."""
     pass
 
 class XtremCacheItemNotFound(XtremCacheException):
@@ -9,39 +9,39 @@ class XtremCacheItemNotFound(XtremCacheException):
     pass
 
 class XtremCacheAlreadyCached(XtremCacheException):
-    """Impossible to find item in database."""
+    """Item already cached with same ID, please use force to override."""
     pass
 
 class XtremCacheRemoveError(XtremCacheException):
-    """Impossible to find item in database."""
+    """Impossible to remove item."""
     pass
 
 class XtremCacheFileNotFoundError(XtremCacheException):
-    """Impossible to find item in database."""
+    """Impossible to find the file or directory to cache."""
     pass
 
 class XtremCacheTimeoutError(XtremCacheException):
-    """Impossible to find item in database."""
+    """Timeout."""
     pass
 
 class XtremCacheArchive(XtremCacheException):
-    """Impossible to find item in database."""
+    """All exceptions related to the archive."""
     pass
 
 class XtremCacheArchiveCreationError(XtremCacheArchive):
-    """Impossible to find item in database."""
+    """Impossible to create an archive of the file or directory."""
     pass
 
 class XtremCacheArchiveExtractionError(XtremCacheArchive):
-    """Impossible to find item in database."""
+    """Impossible to extract archive."""
     pass
 
 class XtremCacheArchiveRemovingError(XtremCacheArchive):
-    """Impossible to find item in database."""
+    """Impossible remove archive."""
     pass
 
 class XtremCacheInputError(XtremCacheArchive):
-    """Impossible to find item in database."""
+    """Command line options problem."""
     pass
 
 

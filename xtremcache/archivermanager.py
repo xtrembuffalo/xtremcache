@@ -9,6 +9,8 @@ def create_archiver(cache_dir):
 
 # Cache / Uncache
 class ArchiveManager():
+    """Create an archive from id."""
+
     def __init__(self, cache_dir):
         self._cache_dir = cache_dir
 
@@ -59,9 +61,11 @@ class ArchiveManager():
             raise XtremCacheArchiveExtractionError(e)
 
 class ZipArchiver(ArchiveManager):
+    """Zip archive format."""
+
     def __init__(self, cache_dir) -> None:
         super().__init__(cache_dir)
-    
+
     @property
     @abstractmethod
     def format(self):
@@ -73,9 +77,11 @@ class ZipArchiver(ArchiveManager):
         return 'zip'
 
 class GZipArchiver(ArchiveManager):
+    """Gztar archive format."""
+
     def __init__(self, cache_dir) -> None:
         super().__init__(cache_dir)
-        
+
     @property
     @abstractmethod
     def format(self):

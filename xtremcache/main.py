@@ -13,9 +13,8 @@ from xtremcache.cachemanager import CacheManager
 class CommandRunner():
     """Convert input command (executable arguments) to CacheManager method."""
     
-    def __init__(self, manager, configuration) -> None:
+    def __init__(self, manager) -> None:
         self.__manager = manager
-        self.__configuration = configuration
 
     def run(self, args) -> None:
         command = getattr(args, 'command', None)
@@ -136,8 +135,7 @@ def command_runnner(args, configuration) -> None:
     CommandRunner(CacheManager(
         configuration.cache_dir,
         configuration.max_size
-        ),
-        configuration).run(args)
+        )).run(args)
 
 def main(argv) -> int:
     rt = 0
