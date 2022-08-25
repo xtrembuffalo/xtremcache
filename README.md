@@ -1,6 +1,9 @@
 # xtremcache
 
-`xtremcache` is a Python package dedicated to handle generic file and directories caching.
+`xtremcache` is a Python package dedicated to handle generic file and directories caching on Windows or Linux.
+The goal of this module is to be able to cache a file or directory with a unique unique identifier of your choice and lather uncache to a specific location.
+The directory where the caced files are located is local.
+The concurrent access (reading and writing) on chached archives is handle by a small data base located in the local datas directory.
 
 ## Installation
 
@@ -16,13 +19,15 @@ python -m unittest discover -s tests/unit # Unit tests
 python -m unittest discover -s tests/integration # Integration tests
 ```
 
-## Module usage
+## Usage
 
 ### Cache and uncache example
 
 - Create CacheManager with data location and the maximum size of this cache directory
 - Cache a directory with unique id to find it lather
-- Uncache with unique id to a specifique directory
+- Uncache with unique id to a specifique directory :joy:
+
+Python:
 
 ```python
 from xtremcache.cachemanager import CacheManager
@@ -33,13 +38,23 @@ cache_manager = CacheManager(
     )
 cache_manager.cache(
     id='UUID',
-    path='/tmp/dir_to_cache'
+    path='~/dir_to_cache'
     )
 cache_manager.uncache(
     id='UUID',
-    path='/tmp/destination_dir'
+    path='~/destination_dir'
     )
 ```
+
+Shell:
+
+```sh
+xtremcache config --cache-dir '/tmp/xtremcache' --max-size '10000000'
+xtremcache cache --id 'UUID' '~/dir_to_cache' 
+xtremcache uncache --id 'UUID' '~/destination_dir'
+```
+
+---
 
 ### Override cached example
 
@@ -47,6 +62,8 @@ cache_manager.uncache(
 - Cache a directory with unique id to find it lather
 - Override last unique id to a new directory
 
+Python:
+
 ```python
 from xtremcache.cachemanager import CacheManager
 
@@ -56,14 +73,24 @@ cache_manager = CacheManager(
     )
 cache_manager.cache(
     id='UUID',
-    path='/tmp/dir_to_cache'
+    path='~/dir_to_cache'
     )
 cache_manager.cache(
     id='UUID',
-    path='/tmp/new_dir_to_cache',
+    path='~/new_dir_to_cache',
     force=True
     )
 ```
+
+Shell:
+
+```sh
+xtremcache config --cache-dir '/tmp/xtremcache' --max-size '10000000'
+xtremcache cache --id 'UUID' '~/dir_to_cache' 
+xtremcache cache --force --id 'UUID' '~/new_dir_to_cache'
+```
+
+---
 
 ### Cache and clean example
 
@@ -71,6 +98,8 @@ cache_manager.cache(
 - Cache a directory with unique id to find it lather
 - Remove chached file
 
+Python:
+
 ```python
 from xtremcache.cachemanager import CacheManager
 
@@ -80,12 +109,22 @@ cache_manager = CacheManager(
     )
 cache_manager.cache(
     id='UUID',
-    path='/tmp/dir_to_cache'
+    path='~/dir_to_cache'
     )
 cache_manager.remove(
     id='UUID'
     )
 ```
+
+Shell:
+
+```sh
+xtremcache config --cache-dir '/tmp/xtremcache' --max-size '10000000'
+xtremcache cache --id 'UUID' '~/dir_to_cache' 
+xtremcache remove --id 'UUID'
+```
+
+---
 
 ### Cache and clean all example
 
@@ -93,6 +132,8 @@ cache_manager.remove(
 - Cache a directory with unique id to find it lather
 - Remove all chached files
 
+Python:
+
 ```python
 from xtremcache.cachemanager import CacheManager
 
@@ -102,7 +143,15 @@ cache_manager = CacheManager(
     )
 cache_manager.cache(
     id='UUID',
-    path='/tmp/dir_to_cache'
+    path='~/dir_to_cache'
     )
 cache_manager.remove_all()
+```
+
+Shell:
+
+```sh
+xtremcache config --cache-dir '/tmp/xtremcache' --max-size '10000000'
+xtremcache cache --id 'UUID' '~/dir_to_cache' 
+xtremcache remove_all
 ```
