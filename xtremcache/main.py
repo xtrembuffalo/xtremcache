@@ -35,7 +35,7 @@ class CommandRunner():
 def get_args(argv) -> argparse.Namespace:
     # Global
     parser = argparse.ArgumentParser(
-        description='Local cache'
+        description='Handle generic file and directories caching'
     )
 
     # Command
@@ -46,19 +46,19 @@ def get_args(argv) -> argparse.Namespace:
     # Cache
     cache_parser = sub_parsers.add_parser(
         'cache',
-        help='Put in cache.')
+        help='Save file or directory with unique id')
     cache_parser.add_argument(
         '--id',
         '-i',
         type=str,
         default=None,
-        help='UUID'
+        help='Unique identificator.'
     )
     cache_parser.add_argument(
         '--force',
         '-f',
         action='store_true',
-        help='Force update current cached archive.'
+        help='Force update current cached file or directory.'
     )
     cache_parser.add_argument(
         'path',
@@ -69,36 +69,36 @@ def get_args(argv) -> argparse.Namespace:
     # Uncache
     uncache_parser = sub_parsers.add_parser(
         'uncache',
-        help='Put in cache')
+        help='Extract cached file or directory.')
     uncache_parser.add_argument(
         '--id',
         '-i',
         type=str,
         default=None,
-        help='UUID'
+        help='Unique identificator.'
     )
     uncache_parser.add_argument(
         'path',
         type=str,
-        help='Cache destination.'
+        help='Destination file or directory.'
     )
 
     # Remove one
     remove_parser = sub_parsers.add_parser(
         'remove',
-        help='Remove one item.')
+        help='Remove specific item.')
     remove_parser.add_argument(
         '--id',
         '-i',
         type=str,
         default=None,
-        help='UUID'
+        help='Unique identificator.'
     )
 
     # Remove all
     sub_parsers.add_parser(
         'remove_all',
-        help='Remove all database and cached files.')
+        help='Remove all cached item.')
 
     # Config
     config_parser = sub_parsers.add_parser(
