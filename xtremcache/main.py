@@ -46,7 +46,7 @@ def get_args(argv) -> argparse.Namespace:
     # Cache
     cache_parser = sub_parsers.add_parser(
         'cache',
-        help='Save file or directory with unique id')
+        help='Save file or directory with unique id.')
     cache_parser.add_argument(
         '--id',
         '-i',
@@ -137,7 +137,7 @@ def command_runnner(args, configuration) -> None:
         configuration.max_size
         )).run(args)
 
-def main(argv) -> int:
+def exec(argv) -> int:
     rt = 0
     try:
         args = get_args(argv=argv)
