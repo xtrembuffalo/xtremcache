@@ -19,7 +19,7 @@ setup(
     long_description=Path(os.path.join(__get_current_dir(), 'README.md')).read_text(),
     long_description_content_type='text/markdown',
     url='https://github.com/xtrembuffalo/xtremcache',
-    install_requires=__get_install_requires('requirements.txt'),
+    install_requires=__get_install_requires('dist-requirements.txt'),
     entry_points={
         'console_scripts': ['xtremcache=xtremcache.__main__:main']
     },
