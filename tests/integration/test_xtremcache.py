@@ -5,7 +5,7 @@ from webbrowser import get
 import yaml
 from ddt import ddt, data
 
-from xtremcache.main import main
+from xtremcache.main import exec
 from tests.test_utils import *
 
 DEFAULT_TESTS_MAX_SIZE=1000000
@@ -21,7 +21,7 @@ class TestXtremcache(unittest.TestCase):
         generate_dir_to_cache(self.__dir_to_cache)
 
     def xtremcache(self, *args):
-        return main(['--config-file', self.__config_file] + list(args))
+        return exec(['--config-file', self.__config_file] + list(args))
 
     def test_configuration(self):
         self.assertEqual(self.xtremcache(
