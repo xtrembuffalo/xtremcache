@@ -2,7 +2,6 @@ import random
 import string
 import os
 import random
-from ddt import ddt, data
 
 from xtremcache.utils import *
 

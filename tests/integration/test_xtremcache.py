@@ -1,7 +1,6 @@
 import unittest
 import tempfile
 import shutil
-from webbrowser import get
 import yaml
 from ddt import ddt, data
 

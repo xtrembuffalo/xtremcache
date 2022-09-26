@@ -1,7 +1,5 @@
 import os
-import logging
 import time
-from typing import final
 
 from xtremcache.archivermanager import create_archiver
 from xtremcache.bddmanager import BddManager

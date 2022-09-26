@@ -1,7 +1,5 @@
-from importlib.metadata import requires
 from setuptools import setup
 from pathlib import Path
-import os
 
 def __get_install_requires(rtype):
     requirements = Path(f"{rtype}-requirements.txt").read_text()
