@@ -81,7 +81,7 @@ class TestCacheGlobal(unittest.TestCase):
         self.__cache_manager.cache(id, self.__dir_to_cache)
         shutil.rmtree(self.__dir_to_cache)
         generate_dir_to_cache(self.__dir_to_cache)
-        self.assertRaises(XtremCacheAlreadyCached, self.__cache_manager.cache, id, self.__dir_to_cache)
+        self.assertRaises(XtremCacheAlreadyCachedError, self.__cache_manager.cache, id, self.__dir_to_cache)
         self.__cache_manager.cache(id, self.__dir_to_cache, force=True)
         self.__cache_manager.uncache(id, self.__dir_to_uncache)
         self.assertTrue(dircmp(self.__dir_to_uncache, self.__dir_to_cache))
