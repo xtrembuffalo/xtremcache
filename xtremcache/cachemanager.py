@@ -8,8 +8,8 @@ from xtremcache.utils import *
 class CacheManager():
     """All actions to do when file or directory is cached or exit from the cache."""
 
-    delay_time = 0.5
-    default_timeout = 60
+    DELAY_TIME = 0.5
+    DEFAULT_TIMEOUT = 60
 
     def __init__(
         self,
@@ -35,7 +35,7 @@ class CacheManager():
             archiver = self.__archiver
             try:
                 item = bdd.get(id)
-            except XtremCacheItemNotFound:
+            except XtremCacheItemNotFoundError:
                 item = bdd.get(id, create=True)
                 try:
                     archive_path = archiver.archive(id, path)
@@ -53,29 +53,16 @@ class CacheManager():
             else:
                 if force:
                     self.remove(id)
-                    cache(
-                        id,
-                        path,
-                        False)
+                    cache(id, path, False)
                 else:
-                    raise XtremCacheAlreadyCached()
-            
-        timeout_exec(
-            timeout,
-            cache,
-            id,
-            path,
-            force
-        )
-    
-    def uncache(
-        self,
-        id, 
-        path, 
-        timeout=default_timeout):
-        def uncache(
-            id,
-            path):
+                    raise XtremCacheAlreadyCachedError()
+
+        timeout_exec(timeout, cache, id, path, force)
+
+    def uncache(self, id, path, timeout=DEFAULT_TIMEOUT):
+        """Extract the archive with the given id at the given path."""
+
+        def uncache(id, path):
             bdd = self.__bdd_manager
             archiver = self.__archiver
             item = bdd.get(id)
@@ -93,15 +80,14 @@ class CacheManager():
                     item.readers = item.readers - 1
                     bdd.update(item)
             else:
-                time.sleep(self.delay_time)
+                time.sleep(self.DELAY_TIME)
                 raise FunctionRetry()
-        timeout_exec(
-            timeout,
-            uncache,
-            id,
-            path)
+
+        timeout_exec(timeout, uncache, id, path)
 
     def __max_size_cleaning(self):
+        """Delete the oldest archives to match the max_size limitation."""
+
         bdd = self.__bdd_manager
         all_sizes = bdd.get_all_values(bdd.Item.size)
         all_sizes.append(bdd.size)
@@ -110,17 +96,16 @@ class CacheManager():
                 self.remove(bdd.older.id)
                 self.__max_size_cleaning()
 
-    def remove_all(
-        self,
-        timeout=default_timeout):
+    def remove_all(self, timeout=DEFAULT_TIMEOUT):
+        """Delete all archives."""
+
         bdd = self.__bdd_manager
         for id in bdd.get_all_values(bdd.Item.id):
             self.remove(id, timeout)
 
-    def remove(
-        self,
-        id,
-        timeout=default_timeout):
+    def remove(self, id, timeout=DEFAULT_TIMEOUT):
+        """Delete an archive based on its id."""
+
         def remove(id):
             bdd = self.__bdd_manager
             cache_dir = self.__cache_dir
@@ -139,9 +124,7 @@ class CacheManager():
                     raise XtremCacheArchiveRemovingError(e)
                 bdd.delete(item.id)
             else:
-                time.sleep(self.delay_time)
+                time.sleep(self.DELAY_TIME)
                 raise FunctionRetry()
-        timeout_exec(
-            timeout,
-            remove,
-            id)
+
+        timeout_exec(timeout, remove, id)

@@ -37,21 +37,21 @@ class TestBddManager(unittest.TestCase):
 
     @data(*get_id_data())
     def test_read_nonexistent_item(self, id):
-        self.assertRaises(XtremCacheItemNotFound, self.__bdd.get, id)
+        self.assertRaises(XtremCacheItemNotFoundError, self.__bdd.get, id)
 
     @data(*get_id_data())
     def test_update_non_existing_item(self, id):
         item = self.__bdd.create_item(id)
-        self.assertRaises(XtremCacheItemNotFound, self.__bdd.update, item)
+        self.assertRaises(XtremCacheItemNotFoundError, self.__bdd.update, item)
 
     def test_clean_all_item(self):
         # Populate and clean and repeat
         for i in range(3):
             item_list = populate(self.__bdd)
-            self.__bdd.delete_all()  
+            self.__bdd.delete_all()
             for item in item_list:
-                self.assertRaises(XtremCacheItemNotFound, self.__bdd.get, item.id)
-            self.__bdd.create_item("AddAfterRemoving")
+                self.assertRaises(XtremCacheItemNotFoundError, self.__bdd.get, item.id)
+            self.__bdd.create_item('AddAfterRemoving')
 
     def test_get_all_item_values(self):
         size_sum = [item.size for item in populate(self.__bdd)]
@@ -61,7 +61,7 @@ class TestBddManager(unittest.TestCase):
         item_list = populate(self.__bdd)
         older = self.__bdd.older
         self.assertEqual(older, item_list[-1])
-    
+
     def tearDown(self):
         shutil.rmtree(self.__temp_dir)
 

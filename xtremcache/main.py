@@ -1,21 +1,22 @@
-import os
 import argparse
 import inspect
-from pathlib import Path
 
 from xtremcache.configuration import ConfigurationFactory
 from xtremcache.utils import *
 from xtremcache.exceptions import *
 from xtremcache.cachemanager import CacheManager
 
+
 # Configuration
 class CommandRunner():
     """Convert input command (executable arguments) to CacheManager method."""
-    
+
     def __init__(self, manager) -> None:
         self.__manager = manager
 
     def run(self, args) -> None:
+        """Execute the given command internally."""
+
         command = getattr(args, 'command', None)
         if command:
             try:
@@ -30,16 +31,18 @@ class CommandRunner():
                 print(e)
                 raise XtremCacheInputError(e)
 
+
 # Argument parser
 def get_args(argv) -> argparse.Namespace:
+    """Parse argument from argv into a coherant namespace."""
+
     # Global
     parser = argparse.ArgumentParser(
-        description='Handle generic file and directories caching'
-    )
+        description='Handle generic file and directories caching')
 
     # Command
     sub_parsers = parser.add_subparsers(
-        help="subparsers",
+        help='subparsers',
         dest='command')
 
     # Cache
@@ -51,19 +54,16 @@ def get_args(argv) -> argparse.Namespace:
         '-i',
         type=str,
         default=None,
-        help='Unique identificator.'
-    )
+        help='Unique identificator.')
     cache_parser.add_argument(
         '--force',
         '-f',
         action='store_true',
-        help='Force update current cached file or directory.'
-    )
+        help='Force update current cached file or directory.')
     cache_parser.add_argument(
         'path',
         type=str,
-        help='Directory or file to cache.'
-    )
+        help='Directory or file to cache.')
 
     # Uncache
     uncache_parser = sub_parsers.add_parser(
@@ -74,13 +74,11 @@ def get_args(argv) -> argparse.Namespace:
         '-i',
         type=str,
         default=None,
-        help='Unique identificator.'
-    )
+        help='Unique identificator.')
     uncache_parser.add_argument(
         'path',
         type=str,
-        help='Destination file or directory.'
-    )
+        help='Destination file or directory.')
 
     # Remove one
     remove_parser = sub_parsers.add_parser(
@@ -91,8 +89,7 @@ def get_args(argv) -> argparse.Namespace:
         '-i',
         type=str,
         default=None,
-        help='Unique identificator.'
-    )
+        help='Unique identificator.')
 
     # Remove all
     sub_parsers.add_parser(
@@ -108,35 +105,36 @@ def get_args(argv) -> argparse.Namespace:
         '-c',
         type=str,
         default=None,
-        help='Location of datas.'
-    )
+        help='Location of datas.')
     config_parser.add_argument(
         '--max-size',
         '-s',
         type=int,
         default=None,
-        help='Maximum size of data dir in bytes.'
-    )
-    
+        help='Maximum size of data dir in bytes.')
+
     # Configuration file location
     parser.add_argument(
         '--config-file',
         '-c',
         type=str,
         required=False,
-        default=os.path.join(Path.home(), f".{get_app_name()}", 'config'),
-        help='Location of configuration file.'
-    )
-    
+        default=os.path.join(Path.home(), f'.{get_app_name()}', 'config'),
+        help='Location of configuration file.')
+
     return parser.parse_args(args=argv)
 
 def command_runnner(args, configuration) -> None:
+    """Execute the given command internally."""
+
     CommandRunner(CacheManager(
         configuration.cache_dir,
         configuration.max_size
-        )).run(args)
+    )).run(args)
 
 def exec(argv) -> int:
+    """Handle the full process execution in command line."""
+
     rt = 0
     try:
         args = get_args(argv=argv)

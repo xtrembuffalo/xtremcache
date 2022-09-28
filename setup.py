@@ -1,8 +1,9 @@
 from setuptools import setup
 from pathlib import Path
 
+
 def __get_install_requires(rtype):
-    requirements = Path(f"{rtype}-requirements.txt").read_text()
+    requirements = Path(f'{rtype}-requirements.txt').read_text()
     return requirements.split()
 
 setup(
@@ -19,5 +20,4 @@ setup(
         'console_scripts': ['xtremcache=xtremcache.__main__:main']
     },
     tests_require=__get_install_requires('test'),
-    test_suite='tests'
-)
+    test_suite='tests')

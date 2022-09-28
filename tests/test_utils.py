@@ -29,18 +29,18 @@ def generate_dir_to_cache(root):
     for r in range(3):
         root_dir = os.path.join(root, get_random_text())
         for n in range(3):
-            sub_dir = get_random_text() 
+            sub_dir = get_random_text()
             for m in range(3):
-                file_path = os.path.join(root_dir, sub_dir, f"{get_random_text()}.tmp")
+                file_path = os.path.join(root_dir, sub_dir, f'{get_random_text()}.tmp')
                 os.makedirs(os.path.dirname(file_path), exist_ok=True)
                 with open(file_path, 'a') as f:
                     f.write(get_random_text(100))
                 if isUnix():
                     cwd = os.getcwd()
                     os.chdir(os.path.dirname(file_path))
-                    os.symlink(os.path.basename(file_path), f"{get_random_text()}_symlink.txt")
+                    os.symlink(os.path.basename(file_path), f'{get_random_text()}_symlink.txt')
                     os.chdir(cwd)
-    with open(os.path.join(root_dir, f"{get_random_text()}.tmp"), 'a') as f:
+    with open(os.path.join(root_dir, f'{get_random_text()}.tmp'), 'a') as f:
         f.write(get_random_text(100))
 
 def dircmp(dir1, dir2):

@@ -16,8 +16,8 @@ mkdir = jenkins.&mkdir                                          // http://roa-de
 AGENT_LABEL_EXTRAS_WIN = "jenkins-extras-win"
 AGENT_LABEL_EXTRAS_LNX = "jenkins-extras-lnx"
 
-PRODUCT_VERSION = "v${env.BRANCH_NAME}".replace('/', '_') 
-PRODUCT_VERSION = (PRODUCT_VERSION ==~ /^v[0-9]+(\.[0-9]+)*$/) ? PRODUCT_VERSION : 'devel' 
+PRODUCT_VERSION = "v${env.BRANCH_NAME}".replace('/', '_')
+PRODUCT_VERSION = (PRODUCT_VERSION ==~ /^v[0-9]+(\.[0-9]+)*$/) ? PRODUCT_VERSION : 'devel'
 
 // ======================================================= Steps description ====================================================================================
 
@@ -29,7 +29,7 @@ def get_python_venv_root(){
 }
 
 /**
-* separator depends on platform 
+* separator depends on platform
 */
 def append_in_variable(def var_value, def to_append){
     return "${to_append}${isUnixEnv() ? ":" : ";"}${var_value}"
@@ -87,7 +87,6 @@ def step_checkout_sources(){
     dir('sources'){
         checkout(changelog: false, scm: scm)
     }
-    
 }
 
 
@@ -109,7 +108,7 @@ pipeline {
         stage("Checkout") {
             agent {
                 node {
-                    label AGENT_LABEL_EXTRAS_LNX 
+                    label AGENT_LABEL_EXTRAS_LNX
                     customWorkspace "workspace/xrm_${get_ws_name()}_sc_${env.BUILD_NUMBER}"
                 }
             }

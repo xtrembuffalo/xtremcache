@@ -19,10 +19,10 @@ class TestCacheDir(unittest.TestCase):
         self._temp_dir = tempfile.mkdtemp()
         self.__cache_dir = os.path.join(self._temp_dir, 'datas')
         self.__cache_manager = CacheManager(self.__cache_dir, DEFAULT_TESTS_MAX_SIZE)
-        self.__dir_to_cache = os.path.join(self._temp_dir, "dir_to_cache")
+        self.__dir_to_cache = os.path.join(self._temp_dir, 'dir_to_cache')
         generate_dir_to_cache(self.__dir_to_cache)
-        self.__dir_to_uncache = os.path.join(self._temp_dir, "dir_to_uncache")
-    
+        self.__dir_to_uncache = os.path.join(self._temp_dir, 'dir_to_uncache')
+
     @data(*get_id_data())
     def test_cache_dir(self, id):
         self.__cache_manager.cache(id, self.__dir_to_cache)
@@ -31,7 +31,7 @@ class TestCacheDir(unittest.TestCase):
 
     @data(*get_id_data())
     def test_cache_non_existing_dir(self, id):
-        self.assertRaises(XtremCacheItemNotFound, self.__cache_manager.uncache, id, self.__dir_to_uncache)
+        self.assertRaises(XtremCacheItemNotFoundError, self.__cache_manager.uncache, id, self.__dir_to_uncache)
 
     def tearDown(self):
         shutil.rmtree(self._temp_dir)
@@ -39,11 +39,11 @@ class TestCacheDir(unittest.TestCase):
 @ddt
 class TestCacheFile(unittest.TestCase):
     def setUp(self):
-        self.__file_content = f"Content of file"
+        self.__file_content = f'Content of file'
         self._temp_dir = tempfile.mkdtemp()
         self.__cache_dir = os.path.join(self._temp_dir, 'datas')
         self.__cache_manager = CacheManager(self.__cache_dir, DEFAULT_TESTS_MAX_SIZE)
-        self.__file_to_cache = os.path.join(self._temp_dir, "file_to_cache.txt")
+        self.__file_to_cache = os.path.join(self._temp_dir, 'file_to_cache.txt')
         with open(self.__file_to_cache, 'a') as f:
             f.write(self.__file_content)
 
@@ -56,8 +56,8 @@ class TestCacheFile(unittest.TestCase):
 
     @data(*get_id_data())
     def test_cache_non_existing_file(self, id):
-        self.assertRaises(XtremCacheFileNotFoundError, self.__cache_manager.cache, id, self.__file_to_cache  + "__")
-        self.assertRaises(XtremCacheItemNotFound, self.__cache_manager.uncache, id, self._temp_dir)
+        self.assertRaises(XtremCacheFileNotFoundError, self.__cache_manager.cache, id, self.__file_to_cache  + '__')
+        self.assertRaises(XtremCacheItemNotFoundError, self.__cache_manager.uncache, id, self._temp_dir)
 
     def tearDown(self):
         shutil.rmtree(self._temp_dir)
@@ -68,13 +68,13 @@ class TestCacheGlobal(unittest.TestCase):
         self._temp_dir = tempfile.mkdtemp()
         self.__cache_dir = os.path.join(self._temp_dir, 'datas')
         self.__cache_manager = CacheManager(self.__cache_dir, DEFAULT_TESTS_MAX_SIZE)
-        self.__dir_to_cache = os.path.join(self._temp_dir, "dir_to_cache")
+        self.__dir_to_cache = os.path.join(self._temp_dir, 'dir_to_cache')
         generate_dir_to_cache(self.__dir_to_cache)
-        self.__dir_to_uncache = os.path.join(self._temp_dir, "dir_to_uncache")
+        self.__dir_to_uncache = os.path.join(self._temp_dir, 'dir_to_uncache')
 
     @data(*get_id_data())
     def test_uncache_non_existing_archive(self, id):
-        self.assertRaises(XtremCacheItemNotFound, self.__cache_manager.uncache, id, '.')
+        self.assertRaises(XtremCacheItemNotFoundError, self.__cache_manager.uncache, id, '.')
 
     @data(*get_id_data())
     def test_force_cache(self, id):
@@ -101,10 +101,10 @@ class TestCacheGlobal(unittest.TestCase):
     @data(*get_id_data())
     def test_extraction_error(self, id):
         self.__cache_manager.cache(id, self.__dir_to_cache)
-        filter  = os.path.join(self.__cache_dir, f"*.{create_archiver(self.__cache_dir).ext}")
+        filter  = os.path.join(self.__cache_dir, f'*.{create_archiver(self.__cache_dir).ext}')
         [os.remove(file) for file in glob.glob(filter)]
         self.assertRaises(XtremCacheArchiveExtractionError, self.__cache_manager.uncache, id, self.__dir_to_uncache)
-        self.assertRaises(XtremCacheItemNotFound, self.__cache_manager.uncache, id, self.__dir_to_uncache)
+        self.assertRaises(XtremCacheItemNotFoundError, self.__cache_manager.uncache, id, self.__dir_to_uncache)
         self.__cache_manager.cache(id, self.__dir_to_cache)
         self.__cache_manager.uncache(id, self.__dir_to_uncache)
         self.assertTrue(dircmp(self.__dir_to_uncache, self.__dir_to_cache))
@@ -114,7 +114,7 @@ class TestCacheGlobal(unittest.TestCase):
         archive_manager = create_archiver(self.__cache_dir)
         os.makedirs(os.path.join(self.__cache_dir, str_to_md5(id) + '.' + archive_manager.ext), exist_ok=True)
         self.assertRaises(XtremCacheArchiveCreationError, self.__cache_manager.cache, id, self.__dir_to_cache)
-        self.assertRaises(XtremCacheItemNotFound, self.__cache_manager.uncache, id, self.__dir_to_uncache)
+        self.assertRaises(XtremCacheItemNotFoundError, self.__cache_manager.uncache, id, self.__dir_to_uncache)
 
     @data(*get_id_data())
     def test_remove_all(self, id):
@@ -122,8 +122,8 @@ class TestCacheGlobal(unittest.TestCase):
             self.__cache_manager.cache(id + str(i), self.__dir_to_cache)
         self.__cache_manager.remove_all()
         for i in range(3):
-            self.assertRaises(XtremCacheItemNotFound, self.__cache_manager.uncache, id + str(i), self.__dir_to_uncache)
-        filter  = os.path.join(self.__cache_dir, f"*.{create_archiver(self.__cache_dir).ext}")
+            self.assertRaises(XtremCacheItemNotFoundError, self.__cache_manager.uncache, id + str(i), self.__dir_to_uncache)
+        filter  = os.path.join(self.__cache_dir, f'*.{create_archiver(self.__cache_dir).ext}')
         self.assertListEqual(glob.glob(filter), [])
 
     @data(*get_id_data())
@@ -135,7 +135,7 @@ class TestCacheGlobal(unittest.TestCase):
             removed_id = id + str(i)
             still_exists_id = id + str(i+1)
             self.__cache_manager.remove(removed_id)
-            self.assertRaises(XtremCacheItemNotFound, self.__cache_manager.uncache, removed_id, self.__dir_to_uncache)
+            self.assertRaises(XtremCacheItemNotFoundError, self.__cache_manager.uncache, removed_id, self.__dir_to_uncache)
             if i < laps-1: self.__cache_manager.uncache(still_exists_id, self.__dir_to_uncache)
 
     def tearDown(self):
@@ -146,7 +146,7 @@ class TestCacheConcurrent(unittest.TestCase):
     def setUp(self):
         self._temp_dir = tempfile.mkdtemp()
         self.__cache_dir = os.path.join(self._temp_dir, 'datas')
-        self.__dir_to_cache = os.path.join(self._temp_dir, "dir_to_cache")
+        self.__dir_to_cache = os.path.join(self._temp_dir, 'dir_to_cache')
         generate_dir_to_cache(self.__dir_to_cache)
 
     @data(*get_id_data())
@@ -154,11 +154,11 @@ class TestCacheConcurrent(unittest.TestCase):
         def exec_cache(cache_dir, dir_to_cache, id, index):
             cache_manager = CacheManager(cache_dir, DEFAULT_TESTS_MAX_SIZE)
             cache_manager.cache(id, dir_to_cache)
-            dir_to_uncache = os.path.join(self._temp_dir, f"dir_to_uncache_{index}")
+            dir_to_uncache = os.path.join(self._temp_dir, f'dir_to_uncache_{index}')
             os.makedirs(dir_to_uncache)
             cache_manager.uncache(id, dir_to_uncache)
             self.assertTrue(dircmp(dir_to_uncache, self.__dir_to_cache))
-        for index in range(3):   
+        for index in range(3):
             with ThreadPoolExecutor() as executor:
                 executor.submit(exec_cache, self.__cache_dir, self.__dir_to_cache, id, index)
 
@@ -168,11 +168,11 @@ class TestCacheConcurrent(unittest.TestCase):
             id = id + f'{index}'
             cache_manager = CacheManager(cache_dir, DEFAULT_TESTS_MAX_SIZE)
             cache_manager.cache(id + f'{index}', dir_to_cache)
-            dir_to_uncache = os.path.join(self._temp_dir, f"dir_to_uncache_{index}")
+            dir_to_uncache = os.path.join(self._temp_dir, f'dir_to_uncache_{index}')
             os.makedirs(dir_to_uncache)
             cache_manager.uncache(id, dir_to_uncache)
             self.assertTrue(dircmp(dir_to_uncache, self.__dir_to_cache))
-        for index in range(3):   
+        for index in range(3):
             with ThreadPoolExecutor() as executor:
                 executor.submit(exec_cache, self.__cache_dir, self.__dir_to_cache, id, index)
 
@@ -184,7 +184,7 @@ class TestCacheCleanning(unittest.TestCase):
     def setUp(self):
         self._temp_dir = tempfile.mkdtemp()
         self.__cache_dir = os.path.join(self._temp_dir, 'datas')
-        self.__dir_to_cache = os.path.join(self._temp_dir, "dir_to_cache")
+        self.__dir_to_cache = os.path.join(self._temp_dir, 'dir_to_cache')
         generate_dir_to_cache(self.__dir_to_cache)
 
     @data(*get_id_data())
@@ -207,6 +207,6 @@ class TestCacheCleanning(unittest.TestCase):
         for i in range(10):
             cache_manager.cache(id + str(i), self.__dir_to_cache)
             self.assertLessEqual(get_dir_size(self.__cache_dir), max_size)
-        
+
     def tearDown(self):
         shutil.rmtree(self._temp_dir)

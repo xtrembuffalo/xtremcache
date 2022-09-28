@@ -50,7 +50,7 @@ Shell:
 
 ```sh
 xtremcache config --cache-dir '/tmp/xtremcache' --max-size '10000000'
-xtremcache cache --id 'UUID' '~/dir_to_cache' 
+xtremcache cache --id 'UUID' '~/dir_to_cache'
 xtremcache uncache --id 'UUID' '~/destination_dir'
 ```
 
@@ -86,7 +86,7 @@ Shell:
 
 ```sh
 xtremcache config --cache-dir '/tmp/xtremcache' --max-size '10000000'
-xtremcache cache --id 'UUID' '~/dir_to_cache' 
+xtremcache cache --id 'UUID' '~/dir_to_cache'
 xtremcache cache --force --id 'UUID' '~/new_dir_to_cache'
 ```
 
@@ -120,7 +120,7 @@ Shell:
 
 ```sh
 xtremcache config --cache-dir '/tmp/xtremcache' --max-size '10000000'
-xtremcache cache --id 'UUID' '~/dir_to_cache' 
+xtremcache cache --id 'UUID' '~/dir_to_cache'
 xtremcache remove --id 'UUID'
 ```
 
@@ -152,6 +152,6 @@ Shell:
 
 ```sh
 xtremcache config --cache-dir '/tmp/xtremcache' --max-size '10000000'
-xtremcache cache --id 'UUID' '~/dir_to_cache' 
+xtremcache cache --id 'UUID' '~/dir_to_cache'
 xtremcache remove_all
 ```

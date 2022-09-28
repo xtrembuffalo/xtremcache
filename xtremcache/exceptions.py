@@ -4,11 +4,11 @@ class XtremCacheException(Exception):
     """All XtremCache exceptions."""
     pass
 
-class XtremCacheItemNotFound(XtremCacheException):
+class XtremCacheItemNotFoundError(XtremCacheException):
     """Impossible to find item in database."""
     pass
 
-class XtremCacheAlreadyCached(XtremCacheException):
+class XtremCacheAlreadyCachedError(XtremCacheException):
     """Item already cached with same ID, please use force to override."""
     pass
 
@@ -24,23 +24,23 @@ class XtremCacheTimeoutError(XtremCacheException):
     """Timeout."""
     pass
 
-class XtremCacheArchive(XtremCacheException):
+class XtremCacheArchiveException(XtremCacheException):
     """All exceptions related to the archive."""
     pass
 
-class XtremCacheArchiveCreationError(XtremCacheArchive):
+class XtremCacheArchiveCreationError(XtremCacheArchiveException):
     """Impossible to create an archive of the file or directory."""
     pass
 
-class XtremCacheArchiveExtractionError(XtremCacheArchive):
+class XtremCacheArchiveExtractionError(XtremCacheArchiveException):
     """Impossible to extract archive."""
     pass
 
-class XtremCacheArchiveRemovingError(XtremCacheArchive):
+class XtremCacheArchiveRemovingError(XtremCacheArchiveException):
     """Impossible remove archive."""
     pass
 
-class XtremCacheInputError(XtremCacheArchive):
+class XtremCacheInputError(XtremCacheArchiveException):
     """Command line options problem."""
     pass
 

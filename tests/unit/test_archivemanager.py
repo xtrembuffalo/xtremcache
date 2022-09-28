@@ -5,7 +5,7 @@ import os
 from ddt import ddt, data
 
 from xtremcache.archivermanager import create_archiver
-from tests.test_utils import * 
+from tests.test_utils import *
 
 @ddt
 class TestArchiver(unittest.TestCase):
