@@ -20,12 +20,7 @@ class CacheManager():
         self.__archiver = create_archiver(self.__cache_dir)
         self.__bdd_manager = BddManager(cache_dir)
 
-    def cache(
-        self,
-        id,
-        path,
-        force=False,
-        timeout=default_timeout):
+    def cache(self, id, path, force=False, timeout=DEFAULT_TIMEOUT):
         def cache(
             id,
             path,
