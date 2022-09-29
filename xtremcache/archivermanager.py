@@ -1,6 +1,7 @@
 from abc import abstractmethod
-import shutil
 import os
+import subprocess
+from glob import glob
 
 from xtremcache.utils import *
 
@@ -8,29 +9,37 @@ from xtremcache.utils import *
 def create_archiver(cache_dir):
     """Factory of archvier depending of the os."""
 
-    return GZipArchiver(cache_dir) if isUnix() else ZipArchiver(cache_dir)
+    return LnxArchiver(cache_dir) if isUnix() else WinArchiver(cache_dir)
 
 
 # Cache / Uncache
 class ArchiveManager():
     """Create an archive from id."""
 
-    def __init__(self, cache_dir):
+    def __init__(self, cache_dir, compression_speed=6, excludes=[]):
         self._cache_dir = cache_dir
+        self.__compression_speed = compression_speed
+        self.__excludes = excludes
 
     @property
     @abstractmethod
-    def format(self):
-        """Format of the handled archives."""
+    def zip_exec(self):
+        """Path to the zip exe."""
 
         pass
 
     @property
     @abstractmethod
+    def unzip_exec(self):
+        """Path to the unzip exe."""
+
+        pass
+
+    @property
     def ext(self):
-        """Extention of the handled archives."""
+        """Extention of created archive."""
 
-        pass
+        return 'zip'
 
     def id_to_hash(self, id):
         """Convert archive id into md5 hash."""
@@ -40,83 +49,103 @@ class ArchiveManager():
     def id_to_filename(self, id):
         """Convert archive id into the archive file name."""
 
-        return f'{self.id_to_hash(id)}.{self.ext}'
+        return f'{self.id_to_hash(id)}.zip'
 
     def id_to_archive_path(self, id):
         """Convert archive id into the archive path."""
 
         return os.path.join(self._cache_dir, self.id_to_filename(id))
 
-    def archive(self, id, path):
-        """Archive a dir or file with the given id."""
+    def archive(self, id, src_path):
+        """Archive the dir or file at the given path with the given id."""
 
-        archive_path = self.id_to_archive_path(id)
-        if not os.path.exists(path):
-            raise XtremCacheFileNotFoundError(path)
+        dest_path = self.id_to_archive_path(id)
+        if not os.path.exists(src_path):
+            raise XtremCacheFileNotFoundError(src_path)
         try:
-            root_dir = os.path.realpath(
-                path if os.path.isdir(path)
-                else os.path.dirname(path))
-            shutil.make_archive(
-                base_name=remove_file_extention(archive_path),
-                format=self.format,
-                root_dir=root_dir,
-                base_dir='.')
+            os.makedirs(os.path.dirname(dest_path), exist_ok=True)
+            exclude_args = []
+            for exclude in self.__excludes:
+                exclude_args += ['-x', rf'\*{exclude}\*']
+            src_is_dir = os.path.isdir(src_path)
+            inputs = glob(os.path.join(src_path, '*')) if src_is_dir else glob(src_path)
+            inputs = list(map(lambda p: os.path.relpath(p, src_path), inputs))
+            subprocess.run([
+                    self.zip_exec,
+                    f'-{self.__compression_speed}',
+                    '-y',
+                    '-q',
+                    '-r',
+                    '-FS',
+                    dest_path
+                ] + exclude_args + inputs,
+                cwd=src_path if src_is_dir else os.path.dirname(src_path),
+                check=True)
         except Exception as e:
             raise XtremCacheArchiveCreationError(e)
-        return archive_path
+        return dest_path
 
     def extract(self, id, path):
         """Extract the id's archive at the given path."""
 
         archive_path = self.id_to_archive_path(id)
         try:
-            if not os.path.exists(path):
-                os.makedirs(path, exist_ok=True)
-            shutil.unpack_archive(
-                filename=archive_path,
-                extract_dir=path,
-                format=self.format)
+            os.makedirs(path, exist_ok=True)
+            subprocess.run([
+                    self.unzip_exec,
+                    '-qq',
+                    '-o',
+                    archive_path,
+                    '-d',
+                    path
+                ],
+                check=True)
+            pass
         except Exception as e:
             raise XtremCacheArchiveExtractionError(e)
 
 
-class ZipArchiver(ArchiveManager):
+class WinArchiver(ArchiveManager):
     """Zip archive format."""
+
+    UNZIP_VERSION = 'v6.00'
+    ZIP_VERSION = 'v3.0'
 
     def __init__(self, cache_dir) -> None:
         super().__init__(cache_dir)
 
     @property
     @abstractmethod
-    def format(self):
-        """Format of the handled archives."""
+    def zip_exec(self):
+        """Path to the zip exe."""
 
-        return 'zip'
+        return os.path.join(xtremcache_location(), 'ext', 'msys2', 'zip', self.ZIP_VERSION, 'bin', 'zip')
 
     @property
     @abstractmethod
-    def ext(self):
-        """Extention of the handled archives."""
+    def unzip_exec(self):
+        """Path to the unzip exe."""
 
-        return 'zip'
+        return os.path.join(xtremcache_location(), 'ext', 'msys2', 'unzip', self.UNZIP_VERSION, 'bin', 'unzip')
 
-class GZipArchiver(ArchiveManager):
+
+class LnxArchiver(ArchiveManager):
     """Gztar archive format."""
 
     def __init__(self, cache_dir) -> None:
         super().__init__(cache_dir)
 
+   
     @property
     @abstractmethod
-    def format(self):
-        """Format of the handled archives."""
+    def zip_exec(self):
+        """Path to the zip exe."""
 
-        return 'gztar'
+        return 'zip'
 
     @property
     @abstractmethod
-    def ext(self):
-        """Extention of the handled archives."""
+    def unzip_exec(self):
+        """Path to the unzip exe."""
 
-        return 'tar.gz'
+        return 'unzip'

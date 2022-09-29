@@ -1,3 +1,4 @@
+import subprocess
 import hashlib
 import sys
 import os
@@ -6,6 +7,17 @@ from pathlib import Path
 
 from xtremcache.exceptions import *
 
+
+def is_executable():
+    """Call after pyinstaller in executable"""
+    return getattr(sys, 'frozen', False)
+
+def xtremcache_location():
+    """Return the path to xtremcache dir."""
+    if is_executable():
+        return sys._MEIPASS
+    else:
+        return os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
 
 def get_app_name():
     """Pulic application name."""
@@ -49,3 +61,21 @@ def timeout_exec(timeout, fn, *args, **kwargs):
             if timeout and (time.time() - start_time) > timeout:
                 retry = False
                 raise XtremCacheTimeoutError(e)
+
+def remove_file(file):
+    if isUnix():
+        command = [
+            'rm',
+            '-rf',
+            file
+        ]
+    else:
+       command = [
+            'cmd',
+            '/C',
+            'RD' if os.path.isdir(file) else 'DEL',
+            '/S',
+            '/Q',
+            file
+       ]
+    subprocess.run(command, check=True)

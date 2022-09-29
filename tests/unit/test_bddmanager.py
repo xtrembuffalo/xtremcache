@@ -63,5 +63,5 @@ class TestBddManager(unittest.TestCase):
         self.assertEqual(older, item_list[-1])
 
     def tearDown(self):
-        shutil.rmtree(self.__temp_dir)
+        remove_file(self.__temp_dir)
 

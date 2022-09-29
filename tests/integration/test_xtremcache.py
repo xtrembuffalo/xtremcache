@@ -124,4 +124,4 @@ class TestXtremcache(unittest.TestCase):
                 self.__dir_to_uncache
             ), 1)
     def tearDown(self):
-        shutil.rmtree(self._temp_dir)
+        remove_file(self._temp_dir)

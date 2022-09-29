@@ -24,5 +24,5 @@ class TestArchiver(unittest.TestCase):
         self.assertTrue(dircmp(self.__dir_to_archive, self.__dir_to_extract))
 
     def tearDown(self):
-        shutil.rmtree(self.__temp_dir)
+        remove_file(self.__temp_dir)
 

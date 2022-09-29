@@ -1,3 +1,4 @@
+from glob import glob
 import random
 import string
 import os
@@ -29,23 +30,32 @@ def generate_dir_to_cache(root):
     for r in range(3):
         root_dir = os.path.join(root, get_random_text())
         for n in range(3):
-            sub_dir = get_random_text()
+            sub_dir = os.path.join(root_dir, get_random_text())
+            os.makedirs(sub_dir)
+            if n == 2 and not isUnix():
+                subprocess.run(['attrib', '+H', sub_dir], check=True)
             for m in range(3):
-                file_path = os.path.join(root_dir, sub_dir, f'{get_random_text()}.tmp')
-                os.makedirs(os.path.dirname(file_path), exist_ok=True)
+                file_path = os.path.join(sub_dir, f'{get_random_text()}.tmp')
                 with open(file_path, 'a') as f:
                     f.write(get_random_text(100))
                 if isUnix():
+                    # symlink for unix
                     cwd = os.getcwd()
                     os.chdir(os.path.dirname(file_path))
                     os.symlink(os.path.basename(file_path), f'{get_random_text()}_symlink.txt')
                     os.chdir(cwd)
+                elif m == 2:
+                    # hidden files for win
+                    subprocess.run(['attrib', '+H', file_path], check=True)
     with open(os.path.join(root_dir, f'{get_random_text()}.tmp'), 'a') as f:
         f.write(get_random_text(100))
 
-def dircmp(dir1, dir2):
-    def get_all_files(dir):
+def dircmp(dir1, dir2, excludes=[]):
+    def get_all_files(dir, excludes_to_remove=[]):
         rt = {}
+        for e in excludes_to_remove:
+            for f in glob(e):
+                remove_file(f) if os.path.isdir(f) else os.remove(f)
         for root, dirs, files in os.walk(dir, topdown=False):
             for name in files:
                 file = os.path.relpath(os.path.join(root, name), dir)
@@ -56,5 +66,4 @@ def dircmp(dir1, dir2):
                 key = 'dir'
                 rt[key]=[file] if not rt.get(key) else rt[key] + [file]
         return rt
-    return get_all_files(dir1) == get_all_files(dir2)
-    
+    return get_all_files(dir1, excludes_to_remove=excludes) == get_all_files(dir2)
