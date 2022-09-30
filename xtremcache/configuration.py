@@ -40,7 +40,7 @@ class Configuration():
         return '\n'.join([
             'Configuration:',
             f'   Cache directory: {self.cache_dir}',
-            f'   Max cache size (Mo): {self.max_size / 100_000}'
+            f'   Max cache size (Mo): {self.max_size / 1_000_000}'
         ])
 
 
