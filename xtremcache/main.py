@@ -111,7 +111,7 @@ def get_args(argv) -> argparse.Namespace:
         '-s',
         type=int,
         default=None,
-        help='Maximum size of data dir in bytes.')
+        help='Maximum size of data dir in Mo.')
 
     # Configuration file location
     parser.add_argument(

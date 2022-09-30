@@ -23,7 +23,7 @@ python -m unittest discover -s tests/integration # Integration tests
 
 ### Cache and uncache example
 
-- Create CacheManager with data location and the maximum size of this cache directory
+- Create CacheManager with data location and the maximum size in Mo of this cache directory
 - Cache a directory with unique id to find it lather
 - Uncache with unique id to a specifique directory :joy:
 
@@ -34,7 +34,7 @@ from xtremcache.cachemanager import CacheManager
 
 cache_manager = CacheManager(
     cache_dir='/tmp/xtremcache',
-    max_size=1000000
+    max_size=20000
     )
 cache_manager.cache(
     id='UUID',
@@ -49,7 +49,7 @@ cache_manager.uncache(
 Shell:
 
 ```sh
-xtremcache config --cache-dir '/tmp/xtremcache' --max-size '10000000'
+xtremcache config --cache-dir '/tmp/xtremcache' --max-size '20000'
 xtremcache cache --id 'UUID' '~/dir_to_cache'
 xtremcache uncache --id 'UUID' '~/destination_dir'
 ```
@@ -58,7 +58,7 @@ xtremcache uncache --id 'UUID' '~/destination_dir'
 
 ### Override cached example
 
-- Create CacheManager with data location and the maximum size of this cache directory
+- Create CacheManager with data location and the maximum size in Mo of this cache directory
 - Cache a directory with unique id to find it lather
 - Override last unique id to a new directory
 
@@ -69,7 +69,7 @@ from xtremcache.cachemanager import CacheManager
 
 cache_manager = CacheManager(
     cache_dir='/tmp/xtremcache',
-    max_size=1000000
+    max_size=20000
     )
 cache_manager.cache(
     id='UUID',
@@ -85,7 +85,7 @@ cache_manager.cache(
 Shell:
 
 ```sh
-xtremcache config --cache-dir '/tmp/xtremcache' --max-size '10000000'
+xtremcache config --cache-dir '/tmp/xtremcache' --max-size '20000'
 xtremcache cache --id 'UUID' '~/dir_to_cache'
 xtremcache cache --force --id 'UUID' '~/new_dir_to_cache'
 ```
@@ -94,7 +94,7 @@ xtremcache cache --force --id 'UUID' '~/new_dir_to_cache'
 
 ### Cache and clean example
 
-- Create CacheManager with data location and the maximum size of this cache directory
+- Create CacheManager with data location and the maximum size in Mo of this cache directory
 - Cache a directory with unique id to find it lather
 - Remove chached file
 
@@ -105,7 +105,7 @@ from xtremcache.cachemanager import CacheManager
 
 cache_manager = CacheManager(
     cache_dir='/tmp/xtremcache',
-    max_size=1000000
+    max_size=20000
     )
 cache_manager.cache(
     id='UUID',
@@ -119,7 +119,7 @@ cache_manager.remove(
 Shell:
 
 ```sh
-xtremcache config --cache-dir '/tmp/xtremcache' --max-size '10000000'
+xtremcache config --cache-dir '/tmp/xtremcache' --max-size '20000'
 xtremcache cache --id 'UUID' '~/dir_to_cache'
 xtremcache remove --id 'UUID'
 ```
@@ -128,7 +128,7 @@ xtremcache remove --id 'UUID'
 
 ### Cache and clean all example
 
-- Create CacheManager with data location and the maximum size of this cache directory
+- Create CacheManager with data location and the maximum size in Mo of this cache directory
 - Cache a directory with unique id to find it lather
 - Remove all chached files
 
@@ -139,7 +139,7 @@ from xtremcache.cachemanager import CacheManager
 
 cache_manager = CacheManager(
     cache_dir='/tmp/xtremcache',
-    max_size=1000000
+    max_size=20000
     )
 cache_manager.cache(
     id='UUID',
@@ -151,7 +151,7 @@ cache_manager.remove_all()
 Shell:
 
 ```sh
-xtremcache config --cache-dir '/tmp/xtremcache' --max-size '10000000'
+xtremcache config --cache-dir '/tmp/xtremcache' --max-size '20000'
 xtremcache cache --id 'UUID' '~/dir_to_cache'
 xtremcache remove_all
 ```

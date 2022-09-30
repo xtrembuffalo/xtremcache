@@ -74,7 +74,7 @@ class Configuration():
 
     def __init__(self) -> None:
         self.cache_dir = os.path.join(Path.home(), f'.{get_app_name()}', 'datas')
-        self.max_size = 10000
+        self.max_size = 500_000_000 # default 500 Mo
 
     @property
     def cache_dir(self):
@@ -88,17 +88,19 @@ class Configuration():
 
     @property
     def max_size(self):
-        """Maximal size of the cache directory."""
+        """Maximal size of the cache directory in bytes."""
 
         return self.__max_size
 
     @max_size.setter
     def max_size(self, max_size):
-        self.__max_size = max_size
+        """Get max size in Mo use it in bytes."""
+
+        self.__max_size = max_size * 1_000_000
 
     def __repr__(self) -> str:
         return '\n'.join([
             'Configuration:',
             f'   Cache directory: {self.cache_dir}',
-            f'   Max cache size (Mo): {self.max_size}'
+            f'   Max cache size (Mo): {self.max_size / 100_000}'
         ])

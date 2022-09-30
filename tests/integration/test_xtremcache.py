@@ -7,7 +7,7 @@ from ddt import ddt, data
 from xtremcache.main import exec
 from tests.test_utils import *
 
-DEFAULT_TESTS_MAX_SIZE=1000000
+DEFAULT_TESTS_MAX_SIZE=10_000_000
 
 @ddt
 class TestXtremcache(unittest.TestCase):
@@ -26,7 +26,7 @@ class TestXtremcache(unittest.TestCase):
         self.assertEqual(self.xtremcache(
             'config',
             '--cache-dir', self.__cache_dir,
-            '--max-size', str(DEFAULT_TESTS_MAX_SIZE)
+            '--max-size', str(DEFAULT_TESTS_MAX_SIZE // 1_000_000)
         ), 0)
         self.assertTrue(os.path.isfile(self.__config_file))
         with open(self.__config_file, 'r') as f:
