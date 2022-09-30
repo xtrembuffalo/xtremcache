@@ -1,6 +1,5 @@
 import unittest
 import tempfile
-import shutil
 from ddt import ddt, data
 
 from xtremcache.bddmanager import *
@@ -8,7 +7,7 @@ from xtremcache.exceptions import *
 from tests.test_utils import *
 
 def populate(bdd):
-    id_list = [get_random_text() for i in range(10)]
+    id_list = [get_random_text() for _ in range(10)]
     item_list = []
     for id in id_list:
         item = bdd.get(id, create=True)
@@ -46,7 +45,7 @@ class TestBddManager(unittest.TestCase):
 
     def test_clean_all_item(self):
         # Populate and clean and repeat
-        for i in range(3):
+        for _ in range(3):
             item_list = populate(self.__bdd)
             self.__bdd.delete_all()
             for item in item_list:

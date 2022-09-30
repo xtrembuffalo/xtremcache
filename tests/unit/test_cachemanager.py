@@ -10,7 +10,9 @@ from xtremcache.cachemanager import CacheManager, BddManager
 from xtremcache.archivermanager import create_archiver
 from tests.test_utils import *
 
-DEFAULT_TESTS_MAX_SIZE=1000000
+
+DEFAULT_TESTS_MAX_SIZE=10_000_000
+
 
 @ddt
 class TestCacheDir(unittest.TestCase):
@@ -204,7 +206,7 @@ class TestCacheCleanning(unittest.TestCase):
         max_size = (item_size*3) + bdd_manager.size
         cache_manager = CacheManager(self.__cache_dir, max_size)
         for i in range(10):
-            cache_manager.cache(id + str(i), self.__dir_to_cache)
+            cache_manager.cache(f'{id}{i}', self.__dir_to_cache)
             self.assertLessEqual(get_dir_size(self.__cache_dir), max_size)
 
     def tearDown(self):

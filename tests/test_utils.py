@@ -3,10 +3,13 @@ import random
 import string
 import os
 import random
+from typing import List, Tuple
 
 from xtremcache.utils import *
 
-def get_illegal_chars():
+def get_illegal_chars() -> List[str]:
+    """Return the list of illegal char for windows file name."""
+
     return [
         r'\\',
         r'}',
@@ -16,17 +19,21 @@ def get_illegal_chars():
         r'#'
     ]
 
-def get_id_data():
+def get_id_data() -> Tuple[str, str, str]:
     return (
         'trunk@12594',
         '13c988d4f15e06bcdd0b0af290086a3079cdadb0',
         ' '.join(get_illegal_chars()),
-        )
+    )
 
-def get_random_text(len=10):
+def get_random_text(len: int = 10) -> str:
+    """Generate a text of random lower ascii char of size len."""
+
     return ''.join(random.choice(string.ascii_lowercase) for i in range(len))
 
-def generate_dir_to_cache(root):
+def generate_dir_to_cache(root: str) -> None:
+    """Generate a nightmare dir with Unix symlink and Win hidden files and dir."""
+
     for r in range(3):
         root_dir = os.path.join(root, get_random_text())
         for n in range(3):
@@ -50,8 +57,12 @@ def generate_dir_to_cache(root):
     with open(os.path.join(root_dir, f'{get_random_text()}.tmp'), 'a') as f:
         f.write(get_random_text(100))
 
-def dircmp(dir1, dir2, excludes=[]):
-    def get_all_files(dir, excludes_to_remove=[]):
+def dircmp(dir1: str, dir2: str, excludes: List[str] = []) -> bool:
+    """Compare the content of two dir.
+    
+    Allow to ignore the file listed in exludes from dir1."""
+
+    def _get_all_files(dir, excludes_to_remove=[]):
         rt = {}
         for e in excludes_to_remove:
             for f in glob(e):
@@ -66,4 +77,4 @@ def dircmp(dir1, dir2, excludes=[]):
                 key = 'dir'
                 rt[key]=[file] if not rt.get(key) else rt[key] + [file]
         return rt
-    return get_all_files(dir1, excludes_to_remove=excludes) == get_all_files(dir2)
+    return _get_all_files(dir1, excludes_to_remove=excludes) == _get_all_files(dir2)

@@ -2,61 +2,60 @@ from abc import abstractmethod
 import os
 import subprocess
 from glob import glob
+from typing import List
 
 from xtremcache.utils import *
-
-
-def create_archiver(cache_dir):
-    """Factory of archvier depending of the os."""
-
-    return LnxArchiver(cache_dir) if isUnix() else WinArchiver(cache_dir)
 
 
 # Cache / Uncache
 class ArchiveManager():
     """Create an archive from id."""
 
-    def __init__(self, cache_dir, compression_speed=6, excludes=[]):
+    def __init__(
+            self,
+            cache_dir: str,
+            compression_speed: int = 6,
+            excludes: List[str] = []) -> None:
         self._cache_dir = cache_dir
         self.__compression_speed = compression_speed
         self.__excludes = excludes
 
     @property
     @abstractmethod
-    def zip_exec(self):
+    def zip_exec(self) -> str:
         """Path to the zip exe."""
 
         pass
 
     @property
     @abstractmethod
-    def unzip_exec(self):
+    def unzip_exec(self) -> str:
         """Path to the unzip exe."""
 
         pass
 
     @property
-    def ext(self):
+    def ext(self) -> str:
         """Extention of created archive."""
 
         return 'zip'
 
-    def id_to_hash(self, id):
+    def id_to_hash(self, id: str) -> str:
         """Convert archive id into md5 hash."""
 
         return str_to_md5(id)
 
-    def id_to_filename(self, id):
+    def id_to_filename(self, id: str) -> str:
         """Convert archive id into the archive file name."""
 
         return f'{self.id_to_hash(id)}.zip'
 
-    def id_to_archive_path(self, id):
+    def id_to_archive_path(self, id: str) -> str:
         """Convert archive id into the archive path."""
 
         return os.path.join(self._cache_dir, self.id_to_filename(id))
 
-    def archive(self, id, src_path):
+    def archive(self, id: str, src_path: str) -> str:
         """Archive the dir or file at the given path with the given id."""
 
         dest_path = self.id_to_archive_path(id)
@@ -85,7 +84,7 @@ class ArchiveManager():
             raise XtremCacheArchiveCreationError(e)
         return dest_path
 
-    def extract(self, id, path):
+    def extract(self, id: str, path: str) -> None:
         """Extract the id's archive at the given path."""
 
         archive_path = self.id_to_archive_path(id)
@@ -111,19 +110,19 @@ class WinArchiver(ArchiveManager):
     UNZIP_VERSION = 'v6.00'
     ZIP_VERSION = 'v3.0'
 
-    def __init__(self, cache_dir) -> None:
+    def __init__(self, cache_dir: str) -> None:
         super().__init__(cache_dir)
 
     @property
     @abstractmethod
-    def zip_exec(self):
+    def zip_exec(self) -> str:
         """Path to the zip exe."""
 
         return os.path.join(xtremcache_location(), 'ext', 'msys2', 'zip', self.ZIP_VERSION, 'bin', 'zip')
 
     @property
     @abstractmethod
-    def unzip_exec(self):
+    def unzip_exec(self) -> str:
         """Path to the unzip exe."""
 
         return os.path.join(xtremcache_location(), 'ext', 'msys2', 'unzip', self.UNZIP_VERSION, 'bin', 'unzip')
@@ -132,20 +131,25 @@ class WinArchiver(ArchiveManager):
 class LnxArchiver(ArchiveManager):
     """Gztar archive format."""
 
-    def __init__(self, cache_dir) -> None:
+    def __init__(self, cache_dir: str) -> None:
         super().__init__(cache_dir)
 
-   
     @property
     @abstractmethod
-    def zip_exec(self):
+    def zip_exec(self) -> str:
         """Path to the zip exe."""
 
         return 'zip'
 
     @property
     @abstractmethod
-    def unzip_exec(self):
+    def unzip_exec(self) -> str:
         """Path to the unzip exe."""
 
         return 'unzip'
+
+
+def create_archiver(cache_dir: str) -> ArchiveManager:
+    """Factory of archvier depending of the os."""
+
+    return LnxArchiver(cache_dir) if isUnix() else WinArchiver(cache_dir)

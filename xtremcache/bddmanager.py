@@ -1,6 +1,7 @@
 import os
 import datetime
 from functools import lru_cache
+from typing import Any, List, Type
 from sqlalchemy.orm import Session
 from sqlalchemy import Column
 from sqlalchemy import String, Integer, Boolean, DateTime
@@ -15,32 +16,32 @@ from xtremcache.exceptions import *
 class BddManager():
     """Manage database to valid operations on cached files."""
 
-    def __init__(self, data_base_dir):
+    def __init__(self, data_base_dir: str) -> None:
         self.__data_base_dir = os.path.realpath(data_base_dir)
 
     @property
     @lru_cache
-    def __db_location(self):
+    def __db_location(self) -> str:
         """Path to used database."""
 
         return os.path.join(self.__data_base_dir, f'{get_app_name()}.db')
 
     @property
-    def size(self):
-        """Current size of the database."""
+    def size(self) -> int:
+        """Current size of the database in bytes."""
 
         return os.path.getsize(self.__db_location)
 
     @property
     @lru_cache
-    def __sqlite_db_location(self):
+    def __sqlite_db_location(self) -> str:
         """str to give to sqlalchemy to bridge the sqlite db."""
 
         return f'sqlite:///{self.__db_location}'
 
     @property
     @lru_cache
-    def __engine(self):
+    def __engine(self) -> object:
         """Generate a sqlalchemy engine to manage the sqlite db."""
 
         dir = os.path.dirname(self.__db_location)
@@ -49,7 +50,7 @@ class BddManager():
 
     @property
     @lru_cache
-    def Item(self):
+    def Item(self) -> Type:
         """Abstract factory of Item (archive) in database.
 
         All element of database have to inhert the result of declarative_base(),
@@ -76,13 +77,13 @@ class BddManager():
             archive_path = Column(String, nullable=False)
             created_date = Column(DateTime, default=datetime.datetime.utcnow)
 
-            def copy_from(self, item):
+            def copy_from(self, item: 'Item'):
                 """Copy data members from another Item object."""
 
                 for m in self.data_members_name:
                     setattr(self, m, getattr(item, m, None))
 
-            def __eq__(self, other):
+            def __eq__(self, other: 'Item'):
                 """Compare only data members between two Items (not can_modifie and can_read)."""
 
                 for m in self.data_members_name:
@@ -91,18 +92,18 @@ class BddManager():
                 return True
 
             @property
-            def can_modifie(self):
+            def can_modifie(self) -> bool:
                 """Return True if the Item can be modified safely."""
 
                 return self.can_read and self.readers == 0
 
             @property
-            def can_read(self):
+            def can_read(self) -> bool:
                 """Return True if the Item can be read safely."""
 
                 return not self.writer
 
-            def __repr__(self):
+            def __repr__(self) -> str:
                 return f"<Item(id='{self.id}')>"
 
         self.__base.metadata.create_all(self.__engine)
@@ -124,7 +125,7 @@ class BddManager():
             writer=writer,
             archive_path=archive_path)
 
-    def get(self, id, create=False):
+    def get(self, id: str, create: bool = False):
         """Get a db Item by id.
 
         With create, create it if it's doesn't already exist."""
@@ -144,7 +145,7 @@ class BddManager():
                     raise XtremCacheItemNotFoundError(e)
         return item
 
-    def update(self, item):
+    def update(self, item) -> None:
         """Update a db Item by copy of a the given Item."""
 
         item_from_bdd = self.get(item.id)
@@ -156,7 +157,7 @@ class BddManager():
             except Exception as e:
                 raise XtremCacheItemNotFoundError(e)
 
-    def delete(self, id):
+    def delete(self, id: str):
         """Delete a db Item based on its id."""
 
         with Session(self.__engine) as session:
@@ -177,7 +178,7 @@ class BddManager():
                 session.rollback()
                 raise XtremCacheRemoveError(e)
 
-    def get_all_values(self, member):
+    def get_all_values(self, member: str) -> List[Any]:
         """Return a list of the values of all Items member."""
 
         with Session(self.__engine) as session:

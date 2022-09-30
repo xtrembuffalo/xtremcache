@@ -1,7 +1,8 @@
 import argparse
 import inspect
+from typing import List
 
-from xtremcache.configuration import ConfigurationFactory
+from xtremcache.configuration import Configuration, ConfigurationFactory
 from xtremcache.utils import *
 from xtremcache.exceptions import *
 from xtremcache.cachemanager import CacheManager
@@ -11,10 +12,10 @@ from xtremcache.cachemanager import CacheManager
 class CommandRunner():
     """Convert input command (executable arguments) to CacheManager method."""
 
-    def __init__(self, manager) -> None:
+    def __init__(self, manager: CacheManager) -> None:
         self.__manager = manager
 
-    def run(self, args) -> None:
+    def run(self, args: List[str]) -> None:
         """Execute the given command internally."""
 
         command = getattr(args, 'command', None)
@@ -33,7 +34,7 @@ class CommandRunner():
 
 
 # Argument parser
-def get_args(argv) -> argparse.Namespace:
+def get_args(argv: List[str]) -> argparse.Namespace:
     """Parse argument from argv into a coherant namespace."""
 
     # Global
@@ -124,7 +125,7 @@ def get_args(argv) -> argparse.Namespace:
 
     return parser.parse_args(args=argv)
 
-def command_runnner(args, configuration) -> None:
+def command_runnner(args: List[str], configuration: Configuration) -> None:
     """Execute the given command internally."""
 
     CommandRunner(CacheManager(
@@ -132,7 +133,7 @@ def command_runnner(args, configuration) -> None:
         configuration.max_size
     )).run(args)
 
-def exec(argv) -> int:
+def exec(argv: List[str]) -> int:
     """Handle the full process execution in command line."""
 
     rt = 0

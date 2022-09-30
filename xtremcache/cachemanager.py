@@ -11,20 +11,23 @@ class CacheManager():
     DELAY_TIME = 0.5
     DEFAULT_TIMEOUT = 60
 
-    def __init__(
-        self,
-        cache_dir,
-        max_size) -> None:
+    def __init__(self, cache_dir: str, max_size: int) -> None:
         self.__cache_dir = cache_dir
         self.__max_size = max_size
         self.__archiver = create_archiver(self.__cache_dir)
         self.__bdd_manager = BddManager(cache_dir)
 
-    def cache(self, id, path, force=False, timeout=DEFAULT_TIMEOUT):
+    def cache(
+            self,
+            id: str,
+            path: str,
+            force: bool = False,
+            timeout: int = DEFAULT_TIMEOUT) -> None:
+        """Put the file or dir at the given path in cache."""
         def cache(
-            id,
-            path,
-            force):
+                id: str,
+                path: str,
+                force: bool) -> None:
             bdd = self.__bdd_manager
             cache_dir = self.__cache_dir
             archiver = self.__archiver
@@ -54,10 +57,10 @@ class CacheManager():
 
         timeout_exec(timeout, cache, id, path, force)
 
-    def uncache(self, id, path, timeout=DEFAULT_TIMEOUT):
+    def uncache(self, id: str, path: str, timeout: int = DEFAULT_TIMEOUT) -> None:
         """Extract the archive with the given id at the given path."""
 
-        def uncache(id, path):
+        def uncache(id: str, path: str) -> None:
             bdd = self.__bdd_manager
             archiver = self.__archiver
             item = bdd.get(id)
@@ -80,7 +83,7 @@ class CacheManager():
 
         timeout_exec(timeout, uncache, id, path)
 
-    def __max_size_cleaning(self):
+    def __max_size_cleaning(self) -> None:
         """Delete the oldest archives to match the max_size limitation."""
 
         bdd = self.__bdd_manager
@@ -91,17 +94,17 @@ class CacheManager():
                 self.remove(bdd.older.id)
                 self.__max_size_cleaning()
 
-    def remove_all(self, timeout=DEFAULT_TIMEOUT):
+    def remove_all(self, timeout: int = DEFAULT_TIMEOUT) -> None:
         """Delete all archives."""
 
         bdd = self.__bdd_manager
         for id in bdd.get_all_values(bdd.Item.id):
             self.remove(id, timeout)
 
-    def remove(self, id, timeout=DEFAULT_TIMEOUT):
+    def remove(self, id: str, timeout: int = DEFAULT_TIMEOUT) -> None:
         """Delete an archive based on its id."""
 
-        def remove(id):
+        def _remove(id: int) -> None:
             bdd = self.__bdd_manager
             cache_dir = self.__cache_dir
             item = bdd.get(id)
@@ -122,4 +125,4 @@ class CacheManager():
                 time.sleep(self.DELAY_TIME)
                 raise FunctionRetry()
 
-        timeout_exec(timeout, remove, id)
+        timeout_exec(timeout, _remove, id)
