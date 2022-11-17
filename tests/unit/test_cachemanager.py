@@ -11,7 +11,8 @@ from xtremcache.archivermanager import create_archiver
 from tests.test_utils import *
 
 
-DEFAULT_TESTS_MAX_SIZE=10_000_000
+DEFAULT_TESTS_MAX_SIZE_STR='10m'
+DEFAULT_TESTS_MAX_SIZE_INT=10_000_000
 
 
 @ddt
@@ -19,7 +20,7 @@ class TestCacheDir(unittest.TestCase):
     def setUp(self):
         self._temp_dir = tempfile.mkdtemp()
         self.__cache_dir = os.path.join(self._temp_dir, 'datas')
-        self.__cache_manager = CacheManager(self.__cache_dir, DEFAULT_TESTS_MAX_SIZE)
+        self.__cache_manager = CacheManager(self.__cache_dir, DEFAULT_TESTS_MAX_SIZE_STR)
         self.__dir_to_cache = os.path.join(self._temp_dir, 'dir_to_cache')
         generate_dir_to_cache(self.__dir_to_cache)
         self.__dir_to_uncache = os.path.join(self._temp_dir, 'dir_to_uncache')
@@ -43,7 +44,7 @@ class TestCacheFile(unittest.TestCase):
         self.__file_content = f'Content of file'
         self._temp_dir = tempfile.mkdtemp()
         self.__cache_dir = os.path.join(self._temp_dir, 'datas')
-        self.__cache_manager = CacheManager(self.__cache_dir, DEFAULT_TESTS_MAX_SIZE)
+        self.__cache_manager = CacheManager(self.__cache_dir, DEFAULT_TESTS_MAX_SIZE_STR)
         self.__file_to_cache = os.path.join(self._temp_dir, 'file_to_cache.txt')
         with open(self.__file_to_cache, 'a') as f:
             f.write(self.__file_content)
@@ -68,7 +69,7 @@ class TestCacheGlobal(unittest.TestCase):
     def setUp(self):
         self._temp_dir = tempfile.mkdtemp()
         self.__cache_dir = os.path.join(self._temp_dir, 'datas')
-        self.__cache_manager = CacheManager(self.__cache_dir, DEFAULT_TESTS_MAX_SIZE)
+        self.__cache_manager = CacheManager(self.__cache_dir, DEFAULT_TESTS_MAX_SIZE_STR)
         self.__dir_to_cache = os.path.join(self._temp_dir, 'dir_to_cache')
         generate_dir_to_cache(self.__dir_to_cache)
         self.__dir_to_uncache = os.path.join(self._temp_dir, 'dir_to_uncache')
@@ -121,7 +122,7 @@ class TestCacheGlobal(unittest.TestCase):
     def test_remove_all(self, id):
         for i in range(3):
             self.__cache_manager.cache(id + str(i), self.__dir_to_cache)
-        self.__cache_manager.remove_all()
+        self.__cache_manager.remove()
         for i in range(3):
             self.assertRaises(XtremCacheItemNotFoundError, self.__cache_manager.uncache, id + str(i), self.__dir_to_uncache)
         filter  = os.path.join(self.__cache_dir, f'*.{create_archiver(self.__cache_dir).ext}')
@@ -139,6 +140,16 @@ class TestCacheGlobal(unittest.TestCase):
             self.assertRaises(XtremCacheItemNotFoundError, self.__cache_manager.uncache, removed_id, self.__dir_to_uncache)
             if i < laps-1: self.__cache_manager.uncache(still_exists_id, self.__dir_to_uncache)
 
+    @data(*get_id_data())
+    def test_remove_all(self, id):
+        laps = 4
+        for i in range(laps):
+            self.__cache_manager.cache(id + str(i), self.__dir_to_cache)
+        self.__cache_manager.remove()
+        for i in range(laps):
+            removed_id = id + str(i)
+            self.assertRaises(XtremCacheItemNotFoundError, self.__cache_manager.uncache, removed_id, self.__dir_to_uncache)
+
     def tearDown(self):
         remove_file(self._temp_dir)
 
@@ -153,7 +164,7 @@ class TestCacheConcurrent(unittest.TestCase):
     @data(*get_id_data())
     def test_concurrent_same_id(self, id):
         def exec_cache(cache_dir, dir_to_cache, id, index):
-            cache_manager = CacheManager(cache_dir, DEFAULT_TESTS_MAX_SIZE)
+            cache_manager = CacheManager(cache_dir, DEFAULT_TESTS_MAX_SIZE_STR)
             cache_manager.cache(id, dir_to_cache)
             dir_to_uncache = os.path.join(self._temp_dir, f'dir_to_uncache_{index}')
             os.makedirs(dir_to_uncache)
@@ -167,7 +178,7 @@ class TestCacheConcurrent(unittest.TestCase):
     def test_concurrent(self, id):
         def exec_cache(cache_dir, dir_to_cache, id, index):
             id = id + f'{index}'
-            cache_manager = CacheManager(cache_dir, DEFAULT_TESTS_MAX_SIZE)
+            cache_manager = CacheManager(cache_dir, DEFAULT_TESTS_MAX_SIZE_STR)
             cache_manager.cache(id + f'{index}', dir_to_cache)
             dir_to_uncache = os.path.join(self._temp_dir, f'dir_to_uncache_{index}')
             os.makedirs(dir_to_uncache)
@@ -199,7 +210,7 @@ class TestCacheCleanning(unittest.TestCase):
                         total_size += os.path.getsize(fp)
             return total_size
 
-        cache_manager = CacheManager(self.__cache_dir, DEFAULT_TESTS_MAX_SIZE)
+        cache_manager = CacheManager(self.__cache_dir, DEFAULT_TESTS_MAX_SIZE_STR)
         cache_manager.cache(id, self.__dir_to_cache)
         bdd_manager = BddManager(self.__cache_dir)
         item_size = bdd_manager.get(id).size

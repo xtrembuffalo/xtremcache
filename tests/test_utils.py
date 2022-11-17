@@ -59,7 +59,7 @@ def generate_dir_to_cache(root: str) -> None:
 
 def dircmp(dir1: str, dir2: str, excludes: List[str] = []) -> bool:
     """Compare the content of two dir.
-    
+
     Allow to ignore the file listed in exludes from dir1."""
 
     def _get_all_files(dir, excludes_to_remove=[]):

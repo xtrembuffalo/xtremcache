@@ -1,7 +1,7 @@
 # xtremcache
 
 `xtremcache` is a Python package dedicated to handle generic file and directories caching on Windows or Linux.
-The goal of this module is to be able to cache a file or directory with a unique unique identifier of your choice and lather uncache to a specific location.
+The goal of this module is to be able to cache a file or directory with a unique identifier of your choice and later uncache to a specific location.
 The directory where the caced files are located is local.
 The concurrent access (reading and writing) on chached archives is handle by a small data base located in the local datas directory.
 
@@ -23,9 +23,9 @@ python -m unittest discover -s tests/integration # Integration tests
 
 ### Cache and uncache example
 
-- Create CacheManager with data location and the maximum size in Mo of this cache directory
-- Cache a directory with unique id to find it lather
-- Uncache with unique id to a specifique directory :joy:
+- Create CacheManager with optional data location and the maximum size in Mo of this cache directory.
+- Cache a directory with unique id to find it lather.
+- Uncache with unique id to a specifique directory.
 
 Python:
 
@@ -34,22 +34,20 @@ from xtremcache.cachemanager import CacheManager
 
 cache_manager = CacheManager(
     cache_dir='/tmp/xtremcache',
-    max_size=20000
-    )
+    max_size=20_000_000)
 cache_manager.cache(
     id='UUID',
-    path='~/dir_to_cache'
-    )
+    path='~/dir_to_cache')
 cache_manager.uncache(
     id='UUID',
-    path='~/destination_dir'
-    )
+    path='~/destination_dir')
 ```
 
 Shell:
 
 ```sh
-xtremcache config --cache-dir '/tmp/xtremcache' --max-size '20000'
+xtremcache config set cache_dir '/tmp/xtremcache' --local
+xtremcache config set max_size '20m' --local
 xtremcache cache --id 'UUID' '~/dir_to_cache'
 xtremcache uncache --id 'UUID' '~/destination_dir'
 ```
@@ -69,23 +67,21 @@ from xtremcache.cachemanager import CacheManager
 
 cache_manager = CacheManager(
     cache_dir='/tmp/xtremcache',
-    max_size=20000
-    )
+    max_size=20_000_000)
 cache_manager.cache(
     id='UUID',
-    path='~/dir_to_cache'
-    )
+    path='~/dir_to_cache')
 cache_manager.cache(
     id='UUID',
     path='~/new_dir_to_cache',
-    force=True
-    )
+    force=True)
 ```
 
 Shell:
 
 ```sh
-xtremcache config --cache-dir '/tmp/xtremcache' --max-size '20000'
+xtremcache config set cache_dir '/tmp/xtremcache' --local
+xtremcache config set max_size '20m' --local
 xtremcache cache --id 'UUID' '~/dir_to_cache'
 xtremcache cache --force --id 'UUID' '~/new_dir_to_cache'
 ```
@@ -105,21 +101,19 @@ from xtremcache.cachemanager import CacheManager
 
 cache_manager = CacheManager(
     cache_dir='/tmp/xtremcache',
-    max_size=20000
-    )
+    max_size='20m')
 cache_manager.cache(
     id='UUID',
-    path='~/dir_to_cache'
-    )
+    path='~/dir_to_cache')
 cache_manager.remove(
-    id='UUID'
-    )
+    id='UUID')
 ```
 
 Shell:
 
 ```sh
-xtremcache config --cache-dir '/tmp/xtremcache' --max-size '20000'
+xtremcache config set cache_dir '/tmp/xtremcache' --local
+xtremcache config set max_size '20m' --local
 xtremcache cache --id 'UUID' '~/dir_to_cache'
 xtremcache remove --id 'UUID'
 ```
@@ -139,19 +133,18 @@ from xtremcache.cachemanager import CacheManager
 
 cache_manager = CacheManager(
     cache_dir='/tmp/xtremcache',
-    max_size=20000
-    )
+    max_size='20m')
 cache_manager.cache(
     id='UUID',
-    path='~/dir_to_cache'
-    )
-cache_manager.remove_all()
+    path='~/dir_to_cache')
+cache_manager.remove()
 ```
 
 Shell:
 
 ```sh
-xtremcache config --cache-dir '/tmp/xtremcache' --max-size '20000'
+xtremcache config set cache_dir '/tmp/xtremcache' --local
+xtremcache config set max_size '20m' --local
 xtremcache cache --id 'UUID' '~/dir_to_cache'
-xtremcache remove_all
+xtremcache remove
 ```
