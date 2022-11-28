@@ -92,7 +92,7 @@ class ArchiveManager():
             subprocess.run([
                     self.unzip_exec,
                     '-qq',
-                    '-o',
+                    '-u',
                     archive_path,
                     '-d',
                     path
