@@ -11,14 +11,8 @@ from xtremcache.utils import *
 class ArchiveManager():
     """Create an archive from id."""
 
-    def __init__(
-            self,
-            cache_dir: str,
-            compression_speed: int = 6,
-            excludes: List[str] = []) -> None:
+    def __init__(self, cache_dir: str) -> None:
         self._cache_dir = cache_dir
-        self.__compression_speed = compression_speed
-        self.__excludes = excludes
 
     @property
     @abstractmethod
@@ -55,7 +49,12 @@ class ArchiveManager():
 
         return os.path.join(self._cache_dir, self.id_to_filename(id))
 
-    def archive(self, id: str, src_path: str) -> str:
+    def archive(
+            self,
+            id: str,
+            src_path: str,
+            compression_level: int = 6,
+            excluded: List[str] = []) -> str:
         """Archive the dir or file at the given path with the given id."""
 
         dest_path = self.id_to_archive_path(id)
@@ -64,20 +63,20 @@ class ArchiveManager():
         try:
             os.makedirs(os.path.dirname(dest_path), exist_ok=True)
             exclude_args = []
-            for exclude in self.__excludes:
-                exclude_args += ['-x', rf'\*{exclude}\*']
+            for excl in excluded:
+                exclude_args += ['-x', rf"{excl}" if os.path.isfile(os.path.join(src_path, excl)) else rf"'{excl}/*'"]
             src_is_dir = os.path.isdir(src_path)
             inputs = glob(os.path.join(src_path, '*')) if src_is_dir else glob(src_path)
             inputs = list(map(lambda p: os.path.relpath(p, src_path), inputs))
             subprocess.run([
                     self.zip_exec,
-                    f'-{self.__compression_speed}',
+                    f'-{compression_level}',
                     '-y',
                     '-q',
                     '-r',
                     '-FS',
                     dest_path
-                ] + exclude_args + inputs,
+                ] + inputs + exclude_args,
                 cwd=src_path if src_is_dir else os.path.dirname(src_path),
                 check=True)
         except Exception as e:

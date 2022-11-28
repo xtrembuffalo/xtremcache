@@ -21,7 +21,7 @@ class CacheManager():
     @property
     def cache_dir(self):
         return self.__config.cache_dir
-    
+
     @property
     def max_size(self):
         return self.__config.max_size
@@ -31,13 +31,17 @@ class CacheManager():
             id: str,
             path: str,
             force: bool = False,
+            compression_level: int = 6,
+            excluded: List[str] = [],
             timeout: int = DEFAULT_TIMEOUT) -> None:
         """Put the file or dir at the given path in cache."""
 
         def _cache(
                 id: str,
                 path: str,
-                force: bool) -> None:
+                force: bool,
+                compression_level: int = 6,
+                excluded: List[str] = []) -> None:
             bdd = self.__bdd_manager
             cache_dir = self.cache_dir
             archiver = self.__archiver
@@ -46,7 +50,11 @@ class CacheManager():
             except XtremCacheItemNotFoundError:
                 item = bdd.get(id, create=True)
                 try:
-                    archive_path = archiver.archive(id, path)
+                    archive_path = archiver.archive(
+                        id,
+                        path,
+                        compression_level,
+                        excluded)
                 except Exception as e:
                     item.writer = False
                     bdd.update(item)
@@ -65,7 +73,7 @@ class CacheManager():
                 else:
                     raise XtremCacheAlreadyCachedError()
 
-        timeout_exec(timeout, _cache, id, path, force)
+        timeout_exec(timeout, _cache, id, path, force, compression_level, excluded)
 
     def uncache(self, id: str, path: str, timeout: int = DEFAULT_TIMEOUT) -> None:
         """Extract the archive with the given id at the given path."""
@@ -106,7 +114,7 @@ class CacheManager():
 
     def remove(self, id: str = None, timeout: int = DEFAULT_TIMEOUT) -> None:
         """Delete an archive based on its id."""
-    
+
         def _remove(id: int) -> None:
             bdd = self.__bdd_manager
             cache_dir = self.cache_dir
@@ -146,5 +154,5 @@ class CacheManager():
     def set_max_size(self, value: str, level: ConfigurationLevel):
         """Update the max_size value at the given level.
         If it is not possible, raise an Exception"""
-        
+
         self.__config.set_max_size(value, level)

@@ -49,6 +49,22 @@ class XtreamCacheArgumentParser:
             'path',
             type=str,
             help='Path to the file or directory to store in cache.')
+        cache_parser.add_argument(
+            '--excluded', '-x',
+            dest='excluded',
+            type=str,
+            nargs='*',
+            action='store',
+            required=False,
+            help='Explicitly exclude the specified list of file and dir (relative path from given target).')
+        cache_parser.add_argument(
+            '--compression-level', '-c',
+            dest='compression_level',
+            type=int,
+            choices=range(0, 10),
+            required=False,
+            default=6,
+            help='Level of compression 0 is the fastest and 9 is the most compressed (based on zip -#).')
 
         # Uncache parser
         uncache_parser = command_parser.add_parser(
@@ -104,14 +120,12 @@ class XtreamCacheArgumentParser:
             action='store_const',
             dest='level',
             const='local',
-            default='local'
-        )
+            default='local')
         config_set_level.add_argument(
             '--global', '--glob' '-g',
             action='store_const',
             dest='level',
-            const='global',
-        )
+            const='global')
 
     def get_args(self, argv: List[str]) -> argparse.Namespace:
         """Parse argument from argv into a coherant namespace."""
@@ -130,16 +144,17 @@ class CommandRunner():
         """Execute the given command internally."""
 
         if args.command == 'config':
-            self.config_run(args)
-            return
+            return self.config_run(args)
         try:
+            # Extract args from command only they are usefull for this sub_command.
             command_func = getattr(self.__manager, args.command)
-            kwargs = {
-                key: getattr(args, key, None)
-                for key
-                in inspect.getfullargspec(command_func).args
-                if key != 'self'
-            }
+            wanted_args = filter(lambda k: k != 'self', inspect.getfullargspec(command_func).args)
+            # Build the wanted list of kwargs from past argument.
+            kwargs = {}
+            for key in wanted_args:
+                value = getattr(args, key, None)
+                if value:
+                    kwargs[key] = value        
             command_func(**kwargs)
         except Exception as e:
             print(e)

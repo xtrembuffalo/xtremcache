@@ -1,7 +1,8 @@
 import os
+import re
 from abc import ABC, abstractproperty
 from enum import Enum
-import re
+from functools import lru_cache
 from typing import List
 
 import yaml
@@ -66,7 +67,7 @@ class HardcodedConfiguration(Configuration):
         return ConfigurationLevel.HARD_CODED.value
 
     @property
-    def cache_dir(self) -> str: 
+    def cache_dir(self) -> str:
         if isUnix():
             path = os.path.join('~', f'.{get_app_name()}')
         else:
@@ -174,7 +175,7 @@ class RuntimeConfiguration(Configuration):
     @property
     def id_(self) -> str:
         return ConfigurationLevel.RUNTIME.value
-    
+
     @property
     def cache_dir(self) -> str:
         return self.__cache_dir
@@ -200,12 +201,14 @@ class ConfigurationManager:
 
 
     @property
+    @lru_cache
     def cache_dir(self) -> str:
         for config in reversed(self.__configuration_priority):
             if config.is_set_cache_dir:
                 return config.cache_dir
 
     @property
+    @lru_cache
     def max_size(self) -> int:
         for config in reversed(self.__configuration_priority):
             if config.is_set_max_size:
@@ -219,7 +222,7 @@ class ConfigurationManager:
                 config.set_cache_dir(value)
                 return
         raise ValueError(f'The given configuration {level} is not known.')
-        
+
     def set_max_size(self, value: str, level: ConfigurationLevel):
         """Update max_size variable."""
 
