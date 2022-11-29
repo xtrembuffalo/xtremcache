@@ -1,3 +1,4 @@
+import logging
 import os
 import time
 
@@ -13,10 +14,13 @@ class CacheManager():
     DELAY_TIME = 0.5
     DEFAULT_TIMEOUT = 60
 
-    def __init__(self, cache_dir: str = None, max_size: int = None) -> None:
+    def __init__(self, cache_dir: str = None, max_size: int = None, verbosity: int = 3) -> None:
         self.__config = ConfigurationManager(cache_dir=cache_dir, max_size=max_size)
         self.__archiver = create_archiver(self.__config.cache_dir)
-        self.__bdd_manager = BddManager(self.__config.cache_dir)
+        logging.basicConfig(
+            level=verbosity,
+            format='[XtremCache %(levelname)s - %(asctime)s]: %(message)s')
+        self.__bdd_manager = BddManager(self.__config.cache_dir, verbosity)
 
     @property
     def cache_dir(self):

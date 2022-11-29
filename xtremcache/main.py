@@ -1,5 +1,6 @@
 import argparse
 import inspect
+import logging
 from typing import List
 
 from xtremcache.cachemanager import CacheManager
@@ -21,6 +22,14 @@ class XtreamCacheArgumentParser:
             action='store',
             required=False,
             help='Maximum time of execution in second before stop of the process.')
+        self._parser.add_argument(
+            '--verbosity', '-v',
+            dest='verbosity',
+            type=int,
+            choices=range(0, 6),
+            required=False,
+            default=3,
+            help='Level of verbosity of XtremCache from 0 for debugging to 5 for critical only.')
 
         # Command parser
         command_parser = self._parser.add_subparsers(
@@ -157,7 +166,7 @@ class CommandRunner():
                     kwargs[key] = value        
             command_func(**kwargs)
         except Exception as e:
-            print(e)
+            logging.error(e)
             raise XtremCacheInputError(e)
 
     def config_run(self, args: List[str]) -> None:
@@ -196,9 +205,10 @@ def exec(argv: List[str]) -> int:
         args = XtreamCacheArgumentParser().get_args(argv)
         CommandRunner(CacheManager(
             cache_dir=args.cache_dir if 'cache_dir' in args else None,
-            max_size=args.max_size if 'max_size' in args else None
+            max_size=args.max_size if 'max_size' in args else None,
+            verbosity=args.verbosity*10
         )).run(args)
     except Exception as e:
-        print(e)
+        logging.error(e)
         rt = 1
     return rt

@@ -1,23 +1,24 @@
-import os
 import datetime
+import logging
+import os
 from functools import lru_cache
 from typing import Any, List, Type
-from sqlalchemy.orm import Session
-from sqlalchemy import Column
-from sqlalchemy import String, Integer, Boolean, DateTime
-from sqlalchemy.orm import declarative_base
-from sqlalchemy import create_engine
+
+from sqlalchemy import (Boolean, Column, DateTime, Integer, String,
+                        create_engine)
+from sqlalchemy.orm import Session, declarative_base
 from sqlalchemy.orm.exc import NoResultFound
 
-from xtremcache.utils import *
 from xtremcache.exceptions import *
+from xtremcache.utils import *
 
 
 class BddManager():
     """Manage database to valid operations on cached files."""
 
-    def __init__(self, data_base_dir: str) -> None:
+    def __init__(self, data_base_dir: str, verbosity: int) -> None:
         self.__data_base_dir = os.path.realpath(data_base_dir)
+        self.__verbosity = verbosity
 
     @property
     @lru_cache
@@ -46,7 +47,10 @@ class BddManager():
 
         dir = os.path.dirname(self.__db_location)
         os.makedirs(dir, exist_ok=True)
-        return create_engine(self.__sqlite_db_location, echo=True)
+        engine = create_engine(
+            self.__sqlite_db_location,
+            echo=self.__verbosity<logging.INFO)
+        return engine
 
     @property
     @lru_cache
