@@ -188,16 +188,19 @@ class RuntimeConfiguration(Configuration):
 class ConfigurationManager:
     def __init__(
             self,
-            configuration_priority: List[Configuration] = [
+            configuration_priority: List[Configuration] = None,
+            cache_dir: str = None,
+            max_size: str = None) -> None:
+        if configuration_priority:
+            self.__configuration_priority = configuration_priority
+        else:
+            self.__configuration_priority = [
                 HardcodedConfiguration(),
                 HomeFileConfiguration(),
                 LocalFileConfiguration(),
                 EnvironementConfiguration(),
-            ],
-            cache_dir: str = None,
-            max_size: str = None) -> None:
-        configuration_priority.append(RuntimeConfiguration(cache_dir, max_size))
-        self.__configuration_priority = configuration_priority
+            ]
+        self.__configuration_priority.append(RuntimeConfiguration(cache_dir, max_size))
 
 
     @property
