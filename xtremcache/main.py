@@ -110,7 +110,7 @@ class XtreamCacheArgumentParser:
             required=True,
             help='Choose configuration subcommand to run.')
         config_subcommand.add_parser(
-            'display_config',
+            'display',
             description='Display all configurations layer used.')
         config_set_parser = config_subcommand.add_parser(
             'set',
@@ -185,7 +185,7 @@ class CommandRunner():
                 'global': 'Global file',
             }[args.level]
             command_func(args.value, level)
-            self.__manager.config_display()
+            self.__manager.display()
         elif args.config_subcommand == 'display':
             command_func = getattr(self.__manager, args.config_subcommand)
             kwargs = {

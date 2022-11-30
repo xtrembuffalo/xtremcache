@@ -144,7 +144,7 @@ class CacheManager():
 
         timeout_exec(timeout, _remove, id)
 
-    def config_display(self):
+    def display(self):
         """Print the full configuration thanks to tabulate lib."""
 
         self.__config.display()
