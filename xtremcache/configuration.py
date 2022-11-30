@@ -223,6 +223,8 @@ class ConfigurationManager:
         for config in reversed(self.__configuration_priority):
             if config.id_ == level:
                 config.set_cache_dir(value)
+                # reset the lru_cache value for futur usage.
+                ConfigurationManager.cache_dir.fget.cache_clear()
                 return
         raise ValueError(f'The given configuration {level} is not known.')
 
@@ -232,6 +234,8 @@ class ConfigurationManager:
         for config in reversed(self.__configuration_priority):
             if config.id_ == level:
                 config.set_max_size(value)
+                # reset the lru_cache value for futur usage.
+                ConfigurationManager.max_size.fget.cache_clear()
                 return
         raise ValueError(f'The given configuration {level} is not known.')
 
