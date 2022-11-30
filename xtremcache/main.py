@@ -203,10 +203,14 @@ def exec(argv: List[str]) -> int:
     rt = 0
     try:
         args = XtreamCacheArgumentParser().get_args(argv)
+        verbosity = args.verbosity * 10
+        logging.basicConfig(
+            level=verbosity,
+            format='[XtremCache %(levelname)s - %(asctime)s]: %(message)s')
         CommandRunner(CacheManager(
             cache_dir=args.cache_dir if 'cache_dir' in args else None,
             max_size=args.max_size if 'max_size' in args else None,
-            verbosity=args.verbosity*10
+            verbosity=verbosity
         )).run(args)
     except Exception as e:
         logging.error(e)

@@ -16,7 +16,7 @@ from xtremcache.utils import *
 class BddManager():
     """Manage database to valid operations on cached files."""
 
-    def __init__(self, data_base_dir: str, verbosity: int) -> None:
+    def __init__(self, data_base_dir: str, verbosity: int = logging.WARNING) -> None:
         self.__data_base_dir = os.path.realpath(data_base_dir)
         self.__verbosity = verbosity
 

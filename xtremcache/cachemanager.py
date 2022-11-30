@@ -14,7 +14,7 @@ class CacheManager():
     DELAY_TIME = 0.5
     DEFAULT_TIMEOUT = 60
 
-    def __init__(self, cache_dir: str = None, max_size: int = None, verbosity: int = 3) -> None:
+    def __init__(self, cache_dir: str = None, max_size: int = None, verbosity: int = logging.WARNING) -> None:
         self.__config = ConfigurationManager(cache_dir=cache_dir, max_size=max_size)
         self.__archiver = create_archiver(self.__config.cache_dir)
         logging.basicConfig(
