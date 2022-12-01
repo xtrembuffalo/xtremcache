@@ -141,11 +141,11 @@ class TestConfiguration(unittest.TestCase):
         captured_output = io.StringIO()
         sys.stdout = captured_output
         except_display = """+----------------+-------------+------------+
-| Origin         | cache_dir   |   max_size |
+| Origin         | cache_dir   | max_size   |
 |----------------+-------------+------------|
-| Dummy config 2 | .\\tests\\2   |   20000000 |
-| Runtime        | Not defined |   10000000 |
-| Used values    | .\\tests\\2   |   10000000 |
+| Dummy config 2 | .\\tests\\2   | 20.0M      |
+| Runtime        | Not defined | 10.0M      |
+| Used values    | .\\tests\\2   | 10.0M      |
 +----------------+-------------+------------+
 """
         cfg.display()

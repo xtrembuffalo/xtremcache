@@ -105,20 +105,22 @@ class FileConfiguration(Configuration, ABC):
 
     @property
     def max_size(self) -> int:
-        return convert_size(self._read_yaml_properties().get('max_size'))
+        return small_to_raw_size(self._read_yaml_properties().get('max_size'))
 
     def set_cache_dir(self, value: str) -> None:
         file_content = self._read_yaml_properties()
         file_content['cache_dir'] = value
+        os.makedirs(os.path.dirname(self.config_path), exist_ok=True)
         with open(self.config_path, 'w') as f:
             yaml.safe_dump(file_content, f, default_flow_style=False)
 
     def set_max_size(self, value: str) -> None:
-        if not re.match(r'^\d+[tgm]$', value):
+        if not re.match(r'^\d+[TGMtgm]$', value):
             raise XtremCacheInputError(
-                f'Invalid max_size format: get {value}, correct format is \d+[tgm] e.g.: \'5g\', \'100m\' or \'1t\'.')
+                f'Invalid max_size format: get {value}, correct format is \d+[TGMtgm] e.g.: \'5g\', \'100m\' or \'1t\'.')
         file_content = self._read_yaml_properties()
         file_content['max_size'] = value
+        os.makedirs(os.path.dirname(self.config_path), exist_ok=True)
         with open(self.config_path, 'w') as f:
             yaml.safe_dump(file_content, f, default_flow_style=False)
 
@@ -157,7 +159,7 @@ class EnvironementConfiguration(Configuration):
 
     @property
     def max_size(self) -> int:
-        return convert_size(self.__env_max_size())
+        return small_to_raw_size(self.__env_max_size())
 
     def __env_cache_dir(self) -> str:
         return os.getenv('XCACHE_CACHE_DIR')
@@ -169,7 +171,7 @@ class EnvironementConfiguration(Configuration):
 class RuntimeConfiguration(Configuration):
     def __init__(self, cache_dir: str, max_size: str, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.__max_size = convert_size(max_size)
+        self.__max_size = small_to_raw_size(max_size)
         self.__cache_dir = cache_dir
 
     @property
@@ -247,30 +249,51 @@ class ConfigurationManager:
             [
                 c.id_,
                 c.cache_dir if c.is_set_cache_dir else not_defined_value,
-                c.max_size if c.is_set_max_size else not_defined_value
+                raw_to_small_size(c.max_size) if c.is_set_max_size else not_defined_value
             ]
             for c in self.__configuration_priority
         ]
         header = ['Origin', 'cache_dir', 'max_size']
-        footer = [['Used values', self.cache_dir, self.max_size]]
+        footer = [['Used values', self.cache_dir, raw_to_small_size(self.max_size)]]
         print(tabulate(config_table + footer, header, tablefmt='psql'))
 
 
-def convert_size(raw_size: str) -> int:
-    """Interpret the given raw_size str from terra, giga, mega or bytes to bytes.
+def small_to_raw_size(small_size: str) -> int:
+    """Interpret the given small_size str from terra, giga, mega or bytes to bytes.
+
+    Return None if None is given."""
+
+    if small_size == None:
+        return None
+    if re.match(r'^\d+[TGMtgm]$', str(small_size).upper()):
+        multiplicator_map = {
+            'T': 1_000_000_000_000,
+            'G': 1_000_000_000,
+            'M': 1_000_000
+        }
+        return int(small_size[:-1]) * multiplicator_map[small_size[-1].upper()]
+    elif re.match(r'^\d+$', str(small_size)):
+        return int(small_size)
+    else:
+        raise XtremCacheInputError(
+            f'Invalid max_size format: get {small_size}, correct format are \d+[TGMtgm]? e.g.: \'5g\', \'100m\', \'5000\' or \'1t\'.')
+
+def raw_to_small_size(raw_size: int) -> str: # TODO everything
+    """Interpret the given raw_size int from bytes to terra, giga, mega or bytes.
+
+    Choose the largest multiplicator possible.
     Return None if None is given."""
 
     if raw_size == None:
         return None
-    if re.match(r'^\d+[tgm]$', str(raw_size)):
-        multiplicator_map = {
-            't': 1_000_000_000_000,
-            'g': 1_000_000_000,
-            'm': 1_000_000
-        }
-        return int(raw_size[:-1]) * multiplicator_map[raw_size[-1].lower()]
-    elif re.match(r'^\d+$', str(raw_size)):
-        return int(raw_size)
+    multiplicator_map = {
+        'T': 1_000_000_000_000,
+        'G': 1_000_000_000,
+        'M': 1_000_000
+    }
+    for symbol, multiplicator in multiplicator_map.items():
+        small_size_int = raw_size / multiplicator
+        if small_size_int >= 1:
+            return f'{small_size_int}{symbol}'
     else:
-        raise XtremCacheInputError(
-            f'Invalid max_size format: get {raw_size}, correct format is \d+[tgm]? e.g.: \'5g\', \'100m\', \'5000\' or \'1t\'.')
+        return str(raw_size)
