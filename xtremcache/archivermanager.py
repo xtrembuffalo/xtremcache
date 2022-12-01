@@ -59,7 +59,7 @@ class ArchiveManager():
 
         dest_path = self.id_to_archive_path(id)
         if not os.path.exists(src_path):
-            raise XtremCacheFileNotFoundError(src_path)
+            raise XtremCacheFileNotFoundError(f'Can\' find {src_path}')
         try:
             os.makedirs(os.path.dirname(dest_path), exist_ok=True)
             exclude_args = []

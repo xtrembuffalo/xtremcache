@@ -28,7 +28,7 @@ class XtreamCacheArgumentParser:
             type=int,
             choices=range(0, 6),
             required=False,
-            default=3,
+            default=2,
             help='Level of verbosity of XtremCache from 0 for debugging to 5 for critical only.')
 
         # Command parser
@@ -164,10 +164,10 @@ class CommandRunner():
                 value = getattr(args, key, None)
                 if value:
                     kwargs[key] = value        
-            command_func(**kwargs)
         except Exception as e:
             logging.error(e)
             raise XtremCacheInputError(e)
+        command_func(**kwargs)
 
     def config_run(self, args: List[str]) -> None:
         """Execute the given config command internally."""
@@ -213,6 +213,6 @@ def exec(argv: List[str]) -> int:
             verbosity=verbosity
         )).run(args)
     except Exception as e:
-        logging.error(e)
+        logging.error(f'{e.__class__.__name__}: {e}')
         rt = 1
     return rt

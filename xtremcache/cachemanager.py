@@ -69,13 +69,15 @@ class CacheManager():
                     item.writer = False
                     item.archive_path = os.path.relpath(archive_path, cache_dir)
                     bdd.update(item)
+                    logging.info(f'"{id}" have been well store in cache db.')
                     self.__max_size_cleaning()
             else:
                 if force:
                     self.remove(id)
                     _cache(id, path, False)
                 else:
-                    raise XtremCacheAlreadyCachedError()
+                    raise XtremCacheAlreadyCachedError(
+                        f'An "{id}" item is already cached. Use "--force" option if you want to overwrite it.')
 
         timeout_exec(timeout, _cache, id, path, force, compression_level, excluded)
 
@@ -85,12 +87,17 @@ class CacheManager():
         def _uncache(id: str, path: str) -> None:
             bdd = self.__bdd_manager
             archiver = self.__archiver
-            item = bdd.get(id)
+            try:
+                item = bdd.get(id)
+            except XtremCacheItemNotFoundError as e:
+                logging.error(f'Unable to find "{id}" in cache db.')
+                raise e
             if item.can_read:
                 item.readers = item.readers + 1
                 bdd.update(item)
                 try:
                     archiver.extract(id, path)
+                    logging.info(f'"{id}" have been uncache at {path}.')
                 except XtremCacheArchiveExtractionError as e:
                     item.readers = item.readers - 1
                     bdd.update(item)
@@ -122,9 +129,15 @@ class CacheManager():
         def _remove(id: int) -> None:
             bdd = self.__bdd_manager
             cache_dir = self.cache_dir
-            ids = [id] if id else [id for id in bdd.get_all_values(bdd.Item.id)]
+            ids = [id] if id else bdd.get_all_values(bdd.Item.id)
+            if not ids:
+                logging.info('Cache db is empty, nothing to remove.')
             for id in ids:
-                item = bdd.get(id)
+                try:
+                    item = bdd.get(id)
+                except XtremCacheItemNotFoundError as e:
+                    logging.error(f'Unable to find "{id}" in cache db.')
+                    raise e
                 if item.can_modifie:
                     item.writer = True
                     bdd.update(item)
@@ -154,9 +167,11 @@ class CacheManager():
         If it is not possible, raise an Exception"""
 
         self.__config.set_cache_dir(value, level)
+        logging.info(f'Cache dir have been updated at {level} level.')
 
     def set_max_size(self, value: str, level: ConfigurationLevel):
         """Update the max_size value at the given level.
         If it is not possible, raise an Exception"""
 
         self.__config.set_max_size(value, level)
+        logging.info(f'Max size have been updated at {level} level.')
