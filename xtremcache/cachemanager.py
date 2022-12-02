@@ -2,6 +2,7 @@ import logging
 import os
 import time
 
+from xtremcache import log_level
 from xtremcache.archivermanager import create_archiver
 from xtremcache.bddmanager import BddManager
 from xtremcache.configuration import ConfigurationLevel, ConfigurationManager
@@ -14,7 +15,7 @@ class CacheManager():
     DELAY_TIME = 0.5
     DEFAULT_TIMEOUT = 60
 
-    def __init__(self, cache_dir: str = None, max_size: int = None, verbosity: int = logging.WARNING) -> None:
+    def __init__(self, cache_dir: str = None, max_size: str = None, verbosity: int = log_level.WARNING) -> None:
         self.__config = ConfigurationManager(cache_dir=cache_dir, max_size=max_size)
         self.__archiver = create_archiver(self.__config.cache_dir)
         logging.basicConfig(

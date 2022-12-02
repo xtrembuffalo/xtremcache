@@ -3,6 +3,7 @@ import inspect
 import logging
 from typing import List
 
+from xtremcache import log_level
 from xtremcache.cachemanager import CacheManager
 from xtremcache.exceptions import *
 from xtremcache.utils import *
@@ -22,14 +23,20 @@ class XtreamCacheArgumentParser:
             action='store',
             required=False,
             help='Maximum time of execution in second before stop of the process.')
+        def int_between_0_and_50(string: str) -> int:
+            # try:
+            tested_int = int(string)
+            if tested_int in range(log_level.NOTSET, log_level.CRITICAL+1):
+                return tested_int
+            else:
+                raise ValueError()
         self._parser.add_argument(
             '--verbosity', '-v',
             dest='verbosity',
-            type=int,
-            choices=range(0, 6),
+            type=int_between_0_and_50,
             required=False,
-            default=2,
-            help='Level of verbosity of XtremCache from 0 for debugging to 5 for critical only.')
+            default=30,
+            help=f'Level of verbosity of XtremCache from {log_level.NOTSET} for debugging to {log_level.CRITICAL} for critical only.')
 
         # Command parser
         command_parser = self._parser.add_subparsers(
@@ -203,14 +210,13 @@ def exec(argv: List[str]) -> int:
     rt = 0
     try:
         args = XtreamCacheArgumentParser().get_args(argv)
-        verbosity = args.verbosity * 10
         logging.basicConfig(
-            level=verbosity,
+            level=args.verbosity,
             format='[XtremCache %(levelname)s - %(asctime)s]: %(message)s')
         CommandRunner(CacheManager(
             cache_dir=args.cache_dir if 'cache_dir' in args else None,
             max_size=args.max_size if 'max_size' in args else None,
-            verbosity=verbosity
+            verbosity=args.verbosity
         )).run(args)
     except Exception as e:
         logging.error(f'{e.__class__.__name__}: {e}')

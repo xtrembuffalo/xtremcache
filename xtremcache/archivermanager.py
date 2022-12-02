@@ -64,7 +64,11 @@ class ArchiveManager():
             os.makedirs(os.path.dirname(dest_path), exist_ok=True)
             exclude_args = []
             for excl in excluded:
-                exclude_args += ['-x', rf"{excl}" if os.path.isfile(os.path.join(src_path, excl)) else rf"'{excl}/*'"]
+                exclude_args += [
+                    '-x', rf"{excl}"
+                    if os.path.isfile(os.path.join(src_path, excl))
+                    else rf"'{excl}/*'"
+                ]
             src_is_dir = os.path.isdir(src_path)
             inputs = glob(os.path.join(src_path, '*')) if src_is_dir else glob(src_path)
             inputs = list(map(lambda p: os.path.relpath(p, src_path), inputs))

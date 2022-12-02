@@ -4,6 +4,7 @@ import os
 from functools import lru_cache
 from typing import Any, List, Type
 
+from xtremcache import log_level
 from sqlalchemy import (Boolean, Column, DateTime, Integer, String,
                         create_engine)
 from sqlalchemy.orm import Session, declarative_base
@@ -16,7 +17,7 @@ from xtremcache.utils import *
 class BddManager():
     """Manage database to valid operations on cached files."""
 
-    def __init__(self, data_base_dir: str, verbosity: int = logging.WARNING) -> None:
+    def __init__(self, data_base_dir: str, verbosity: int = log_level.WARNING) -> None:
         self.__data_base_dir = os.path.realpath(data_base_dir)
         self.__verbosity = verbosity
 
@@ -49,7 +50,7 @@ class BddManager():
         os.makedirs(dir, exist_ok=True)
         engine = create_engine(
             self.__sqlite_db_location,
-            echo=self.__verbosity<logging.INFO)
+            echo=self.__verbosity<log_level.INFO)
         return engine
 
     @property
