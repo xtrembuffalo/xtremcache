@@ -35,7 +35,7 @@ class XtreamCacheArgumentParser:
             dest='verbosity',
             type=int_between_0_and_50,
             required=False,
-            default=30,
+            default=20,
             help=f'Level of verbosity of XtremCache from {log_level.NOTSET} for debugging to {log_level.CRITICAL} for critical only.')
 
         # Command parser

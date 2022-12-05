@@ -200,7 +200,7 @@ class BddManager():
 
         with Session(self.__engine) as session:
             try:
-                item = session.query(self.Item).order_by(self.Item.created_date.desc()).first()
+                item = session.query(self.Item).order_by(self.Item.created_date.asc()).first()
             except Exception as e:
                 raise XtremCacheItemNotFoundError(e)
         return item

@@ -70,8 +70,13 @@ class CacheManager():
                     item.writer = False
                     item.archive_path = os.path.relpath(archive_path, cache_dir)
                     bdd.update(item)
-                    logging.info(f'"{id}" have been well store in cache db.')
-                    self.__max_size_cleaning()
+                    logging.info(f'"{id}" have been store in cache db.')
+                    if item.size < (self.max_size - bdd.size):
+                        self.__max_size_cleaning()
+                    else:
+                        self.remove(id)
+                        raise XtremCacheMaxSizeCachedError(
+                            f'Impossible to cache "{id}" item because the archive is too big.')  
             else:
                 if force:
                     self.remove(id)
@@ -113,16 +118,22 @@ class CacheManager():
 
         timeout_exec(timeout, _uncache, id, path)
 
-    def __max_size_cleaning(self) -> None:
-        """Delete the oldest archives to match the max_size limitation."""
+    def __max_size_cleaning(self, removed_list=None) -> None:
+        """Delete the oldest archives to match the max_size limitation.
+        
+        Return the list of deleted Item."""
 
+        if removed_list == None:
+            removed_list = []
         bdd = self.__bdd_manager
         all_sizes = bdd.get_all_values(bdd.Item.size)
         all_sizes.append(bdd.size)
         if len(all_sizes):
             if sum(all_sizes) >= self.max_size:
                 self.remove(bdd.older.id)
-                self.__max_size_cleaning()
+                removed_list.append(bdd.older)
+                self.__max_size_cleaning(removed_list)
+        return removed_list
 
     def remove(self, id: str = None, timeout: int = DEFAULT_TIMEOUT) -> None:
         """Delete an archive based on its id."""

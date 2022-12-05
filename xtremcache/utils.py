@@ -63,7 +63,7 @@ def timeout_exec(timeout: int, fn: Callable, *args, **kwargs) -> Any:
         except FunctionRetry as e:
             if timeout and (time.time() - start_time) > timeout:
                 retry = False
-                raise XtremCacheTimeoutError(e)
+                raise XtremCacheTimeoutError(f'{fn.__name__} timeout: {e}')
 
 def remove_file(file: str) -> None:
     if isUnix():

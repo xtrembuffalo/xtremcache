@@ -12,6 +12,10 @@ class XtremCacheAlreadyCachedError(XtremCacheException):
     """Item already cached with same ID, please use force to override."""
     pass
 
+class XtremCacheMaxSizeCachedError(XtremCacheException):
+    """No enough size to cache."""
+    pass
+
 class XtremCacheRemoveError(XtremCacheException):
     """Impossible to remove item."""
     pass
