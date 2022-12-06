@@ -47,7 +47,8 @@ class XtreamCacheArgumentParser:
         # Cache parser
         cache_parser = command_parser.add_parser(
             'cache',
-            description='Cache the given file or directory.')
+            description='Cache the given file or directory.',
+            help='Cache the given file or directory.')
         cache_parser.add_argument(
             '--force', '-f',
             dest='force',
@@ -85,7 +86,8 @@ class XtreamCacheArgumentParser:
         # Uncache parser
         uncache_parser = command_parser.add_parser(
             'uncache',
-            description='Uncache a archive from cache.')
+            description='Uncache a archive from cache.',
+            help='Uncache a archive from cache.')
         uncache_parser.add_argument(
             '--id', '-i',
             dest='id',
@@ -100,7 +102,8 @@ class XtreamCacheArgumentParser:
         # Remove parser
         remove_parser = command_parser.add_parser(
             'remove',
-            description='Remove archives from cache.')
+            description='Remove archives from cache.',
+            help='Remove archives from cache.')
         remove_parser.add_argument(
             '--id', '-i',
             dest='id',
@@ -111,17 +114,20 @@ class XtreamCacheArgumentParser:
         # Config parser
         config_parser = command_parser.add_parser(
             'config',
-            description='Administrate xtreamcache configuration.')
+            description='Administrate xtreamcache configuration.',
+            help='Administrate xtreamcache configuration.')
         config_subcommand = config_parser.add_subparsers(
             dest='config_subcommand',
             required=True,
             help='Choose configuration subcommand to run.')
         config_subcommand.add_parser(
             'display',
-            description='Display all configurations layer used.')
+            description='Display all configurations layer used.',
+            help='Display all configurations layer used.')
         config_set_parser = config_subcommand.add_parser(
             'set',
-            description='Edit the file configuration.')
+            description='Edit the file configuration.',
+            help='Edit the file configuration.')
         config_set_parser.add_argument(
             'var',
             type=str,
