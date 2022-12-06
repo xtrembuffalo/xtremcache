@@ -222,13 +222,16 @@ class ConfigurationManager:
     def set_cache_dir(self, value: Any, level: ConfigurationLevel):
         """Update cache_dir variable."""
 
+        if not os.path.isabs(value):
+            raise XtremCacheInputError(
+                f'Please provide a absolute path for cache_dir not: "{value}".')
         for config in reversed(self.__configuration_priority):
             if config.id_ == level:
                 config.set_cache_dir(value)
                 # reset the lru_cache value for futur usage.
                 ConfigurationManager.cache_dir.fget.cache_clear()
                 return
-        raise ValueError(f'The given configuration {level} is not known.')
+        raise ValueError(f'The given configuration "{level}" is not known.')
 
     def set_max_size(self, value: str, level: ConfigurationLevel):
         """Update max_size variable."""
@@ -239,7 +242,7 @@ class ConfigurationManager:
                 # reset the lru_cache value for futur usage.
                 ConfigurationManager.max_size.fget.cache_clear()
                 return
-        raise ValueError(f'The given configuration {level} is not known.')
+        raise ValueError(f'The given configuration "{level}" is not known.')
 
     def display(self):
         """Print the full configuration thanks to tabulate lib."""

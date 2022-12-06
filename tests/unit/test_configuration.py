@@ -6,13 +6,12 @@ import unittest
 import yaml
 from xtremcache.configuration import (Configuration, ConfigurationManager,
                                       FileConfiguration)
-from xtremcache.exceptions import XtremCacheInputError
 
 
 HARD_CODED_MAX_SIZE = 50_000_000_000
 
-TEST_CACHE_DIR_PATH = os.path.join('.', 'tests')
-TEST_CONFIG_FILE_PATH = os.path.join('.', 'tests', 'config.yml')
+TEST_CACHE_DIR_PATH = os.path.abspath(os.path.join('.', 'tests'))
+TEST_CONFIG_FILE_PATH = os.path.abspath(os.path.join('.', 'tests', 'config.yml'))
 TEST_MAX_SIZE_STR = '10m'
 TEST_MAX_SIZE_STR_2 = '20m'
 TEST_MAX_SIZE_INT = 10_000_000
@@ -140,13 +139,14 @@ class TestConfiguration(unittest.TestCase):
         old_sys_stdout = sys.stdout
         captured_output = io.StringIO()
         sys.stdout = captured_output
-        except_display = """+----------------+-------------+------------+
-| Origin         | cache_dir   | max_size   |
-|----------------+-------------+------------|
-| Dummy config 2 | .\\tests\\2   | 20.0M      |
-| Runtime        | Not defined | 10.0M      |
-| Used values    | .\\tests\\2   | 10.0M      |
-+----------------+-------------+------------+
+        TEST_CONFIG_FILE_PATH_2 = DummyConfiguration2().cache_dir
+        except_display = f"""+----------------+-----------------------------------+------------+
+| Origin         | cache_dir                         | max_size   |
+|----------------+-----------------------------------+------------|
+| Dummy config 2 | {TEST_CONFIG_FILE_PATH_2} | 20.0M      |
+| Runtime        | Not defined                       | 10.0M      |
+| Used values    | {TEST_CONFIG_FILE_PATH_2} | 10.0M      |
++----------------+-----------------------------------+------------+
 """
         cfg.display()
         self.assertEqual(captured_output.getvalue(), except_display)
