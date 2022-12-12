@@ -6,7 +6,7 @@ from functools import lru_cache
 from typing import List
 
 import yaml
-from tabulate import tabulate
+from tabulate import tabulate, SEPARATING_LINE
 
 from xtremcache.utils import *
 
@@ -15,7 +15,7 @@ class ConfigurationLevel(Enum):
     HARD_CODED = 'Default'
     GLOBAL_FILE = 'Global file'
     LOCAL_FILE = 'Local file'
-    ENV_VAR = 'Environement variables'
+    ENV_VAR = 'Environment variables'
     RUNTIME = 'Runtime'
 
 
@@ -246,19 +246,17 @@ class ConfigurationManager:
 
     def display(self):
         """Print the full configuration thanks to tabulate lib."""
-
-        not_defined_value = 'Not defined'
         config_table = [
             [
                 c.id_,
-                c.cache_dir if c.is_set_cache_dir else not_defined_value,
-                raw_to_small_size(c.max_size) if c.is_set_max_size else not_defined_value
+                c.cache_dir,
+                raw_to_small_size(c.max_size)
             ]
             for c in self.__configuration_priority
         ]
-        header = ['Origin', 'cache_dir', 'max_size']
-        footer = [['Used values', self.cache_dir, raw_to_small_size(self.max_size)]]
-        print(tabulate(config_table + footer, header, tablefmt='psql'))
+        header = ['', 'cache_dir', 'max_size']
+        footer = [SEPARATING_LINE, ['Used', self.cache_dir, raw_to_small_size(self.max_size)]]
+        print(tabulate(config_table + footer, header, tablefmt='simple', missingval="Not defined"))
 
 
 def small_to_raw_size(small_size: str) -> int:

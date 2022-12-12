@@ -19,7 +19,7 @@ DEFAULT_TESTS_MAX_SIZE_INT=10_000_000
 class TestCacheDir(unittest.TestCase):
     def setUp(self):
         self._temp_dir = tempfile.mkdtemp()
-        self.__cache_dir = os.path.join(self._temp_dir, 'datas')
+        self.__cache_dir = os.path.join(self._temp_dir, 'data')
         self.__cache_manager = CacheManager(self.__cache_dir, DEFAULT_TESTS_MAX_SIZE_STR)
         self.__dir_to_cache = os.path.join(self._temp_dir, 'dir_to_cache')
         generate_dir_to_cache(self.__dir_to_cache)
@@ -43,7 +43,7 @@ class TestCacheFile(unittest.TestCase):
     def setUp(self):
         self.__file_content = f'Content of file'
         self._temp_dir = tempfile.mkdtemp()
-        self.__cache_dir = os.path.join(self._temp_dir, 'datas')
+        self.__cache_dir = os.path.join(self._temp_dir, 'data')
         self.__cache_manager = CacheManager(self.__cache_dir, DEFAULT_TESTS_MAX_SIZE_STR)
         self.__file_to_cache = os.path.join(self._temp_dir, 'file_to_cache.txt')
         with open(self.__file_to_cache, 'a') as f:
@@ -68,7 +68,7 @@ class TestCacheFile(unittest.TestCase):
 class TestCacheGlobal(unittest.TestCase):
     def setUp(self):
         self._temp_dir = tempfile.mkdtemp()
-        self.__cache_dir = os.path.join(self._temp_dir, 'datas')
+        self.__cache_dir = os.path.join(self._temp_dir, 'data')
         self.__cache_manager = CacheManager(self.__cache_dir, DEFAULT_TESTS_MAX_SIZE_STR)
         self.__dir_to_cache = os.path.join(self._temp_dir, 'dir_to_cache')
         generate_dir_to_cache(self.__dir_to_cache)
@@ -157,7 +157,7 @@ class TestCacheGlobal(unittest.TestCase):
 class TestCacheConcurrent(unittest.TestCase):
     def setUp(self):
         self._temp_dir = tempfile.mkdtemp()
-        self.__cache_dir = os.path.join(self._temp_dir, 'datas')
+        self.__cache_dir = os.path.join(self._temp_dir, 'data')
         self.__dir_to_cache = os.path.join(self._temp_dir, 'dir_to_cache')
         generate_dir_to_cache(self.__dir_to_cache)
 
@@ -195,7 +195,7 @@ class TestCacheConcurrent(unittest.TestCase):
 class TestCacheCleanning(unittest.TestCase):
     def setUp(self):
         self._temp_dir = tempfile.mkdtemp()
-        self.__cache_dir = os.path.join(self._temp_dir, 'datas')
+        self.__cache_dir = os.path.join(self._temp_dir, 'data')
         self.__dir_to_cache = os.path.join(self._temp_dir, 'dir_to_cache')
         generate_dir_to_cache(self.__dir_to_cache)
 

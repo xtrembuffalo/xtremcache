@@ -18,7 +18,7 @@ class TestXtremcache(unittest.TestCase):
         self._old_cwd = os.getcwd()
         os.chdir(self._temp_dir)
         self._config_file = os.path.join(self._temp_dir, 'config.yml')
-        self._cache_dir = os.path.join(self._temp_dir, 'datas')
+        self._cache_dir = os.path.join(self._temp_dir, 'data')
         self._dir_to_cache = os.path.join(self._temp_dir, 'dir_to_cache')
         self._dir_to_uncache = os.path.join(self._temp_dir, 'dir_to_uncache')
         generate_dir_to_cache(self._dir_to_cache)
@@ -46,9 +46,9 @@ class TestXtremcache(unittest.TestCase):
     def test_configuration(self):
         self.assertTrue(os.path.isfile(self._config_file))
         with open(self._config_file, 'r') as f:
-            datas = yaml.safe_load(f)
-        self.assertEqual(datas['cache_dir'], self._cache_dir)
-        self.assertEqual(datas['max_size'], TESTS_MAX_SIZE_STR)
+            data = yaml.safe_load(f)
+        self.assertEqual(data['cache_dir'], self._cache_dir)
+        self.assertEqual(data['max_size'], TESTS_MAX_SIZE_STR)
 
     @data(*get_id_data())
     def test_cache_uncache_command(self, id):

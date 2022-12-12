@@ -73,13 +73,13 @@ class CacheManager():
                     item.writer = False
                     item.archive_path = os.path.relpath(archive_path, cache_dir)
                     bdd.update(item)
-                    logging.info(f'"{id}" have been store in cache db.')
+                    logging.info(f'"{id}" is cached.')
                     if item.size < (self.max_size - bdd.size):
                         self.__max_size_cleaning()
                     else:
                         self.remove(id)
                         raise XtremCacheMaxSizeCachedError(
-                            f'Impossible to cache "{id}" item because the archive is too big.')  
+                            f'Too big archive to be cached.')
             else:
                 if force:
                     self.remove(id)
@@ -99,14 +99,14 @@ class CacheManager():
             try:
                 item = bdd.get(id)
             except XtremCacheItemNotFoundError as e:
-                logging.error(f'Unable to find "{id}" in cache db.')
+                logging.error(f'Impossible to find "{id}"')
                 raise e
             if item.can_read:
                 item.readers = item.readers + 1
                 bdd.update(item)
                 try:
                     archiver.extract(id, path)
-                    logging.info(f'"{id}" have been uncache at {path}.')
+                    logging.info(f'"{id}" was uncached to {path}.')
                 except XtremCacheArchiveExtractionError as e:
                     item.readers = item.readers - 1
                     bdd.update(item)
@@ -146,12 +146,12 @@ class CacheManager():
             cache_dir = self.cache_dir
             ids = [id] if id else bdd.get_all_values(bdd.Item.id)
             if not ids:
-                logging.info('Cache db is empty, nothing to remove.')
+                logging.info('Empty cache, nothing to remove.')
             for id in ids:
                 try:
                     item = bdd.get(id)
                 except XtremCacheItemNotFoundError as e:
-                    logging.error(f'Unable to find "{id}" in cache db.')
+                    logging.error(f'Unable to find "{id}".')
                     raise e
                 if item.can_modifie:
                     item.writer = True

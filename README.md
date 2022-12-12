@@ -3,7 +3,7 @@
 `xtremcache` is a Python package dedicated to handle generic file and directories caching on Windows or Linux.
 The goal of this module is to be able to cache a file or directory with a unique identifier of your choice and later uncache to a specific location.
 The directory where the cached files are located is local.
-The concurrent access (reading and writing) on chached archives is handle by a small data base located in the local datas directory.
+The concurrent access (reading and writing) on chached archives is handle by a small data base located in the local data directory.
 
 ## Installation
 

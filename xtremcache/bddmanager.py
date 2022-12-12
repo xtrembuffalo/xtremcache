@@ -168,7 +168,7 @@ class BddManager():
             try:
                 session.query(self.Item).filter(self.Item.id.in_([id])).delete()
                 session.commit()
-                logging.info(f'"{id}" have been remove from cache db.')
+                logging.info(f'"{id}" have been removed from cache db.')
             except Exception as e:
                 raise XtremCacheRemoveError(e)
 

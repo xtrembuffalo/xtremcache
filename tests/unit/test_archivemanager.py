@@ -11,7 +11,7 @@ from tests.test_utils import *
 class TestArchiver(unittest.TestCase):
     def setUp(self):
         self.__temp_dir = tempfile.mkdtemp()
-        self.__cache_dir = os.path.join(self.__temp_dir, 'datas')
+        self.__cache_dir = os.path.join(self.__temp_dir, 'data')
         self.__dir_to_archive = os.path.join(self.__temp_dir, 'dir_to_archive')
         self.__dir_to_extract = os.path.join(self.__temp_dir, 'dir_to_extract')
         self.__archiver = create_archiver(self.__cache_dir)
