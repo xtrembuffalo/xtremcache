@@ -2,7 +2,6 @@ import logging
 import os
 import time
 
-from xtremcache import log_level
 from xtremcache.archivermanager import create_archiver
 from xtremcache.bddmanager import BddManager
 from xtremcache.configuration import ConfigurationLevel, ConfigurationManager
@@ -12,16 +11,20 @@ from xtremcache.utils import *
 class CacheManager():
     """All actions to do when file or directory is cached or exit from the cache."""
 
-    DELAY_TIME = 0.5
-    DEFAULT_TIMEOUT = 60
+    VERBOSE = logging.DEBUG
+    INFO = logging.INFO
+    QUIET = logging.ERROR
 
-    def __init__(self, cache_dir: str = None, max_size: str = None, verbosity: int = log_level.WARNING) -> None:
+    _DELAY_TIME = 0.5
+    _DEFAULT_TIMEOUT = 60
+
+    def __init__(self, cache_dir: str = None, max_size: str = None, log_level: int = logging.WARNING) -> None:
         self.__config = ConfigurationManager(cache_dir=cache_dir, max_size=max_size)
         self.__archiver = create_archiver(self.__config.cache_dir)
         logging.basicConfig(
-            level=verbosity,
-            format='[xtremcache %(levelname)s - %(asctime)s]: %(message)s')
-        self.__bdd_manager = BddManager(self.__config.cache_dir, verbosity)
+            level=log_level,
+            format='[XtremCache %(levelname)s - %(asctime)s]: %(message)s')
+        self.__bdd_manager = BddManager(self.__config.cache_dir, log_level)
 
     @property
     def cache_dir(self):
@@ -38,7 +41,7 @@ class CacheManager():
             force: bool = False,
             compression_level: int = 6,
             excluded: List[str] = [],
-            timeout: int = DEFAULT_TIMEOUT) -> None:
+            timeout: int = _DEFAULT_TIMEOUT) -> None:
         """Put the file or dir at the given path in cache."""
 
         def _cache(
@@ -87,7 +90,7 @@ class CacheManager():
 
         timeout_exec(timeout, _cache, id, path, force, compression_level, excluded)
 
-    def uncache(self, id: str, path: str, timeout: int = DEFAULT_TIMEOUT) -> None:
+    def uncache(self, id: str, path: str, timeout: int = _DEFAULT_TIMEOUT) -> None:
         """Extract the archive with the given id at the given path."""
 
         def _uncache(id: str, path: str) -> None:
@@ -113,7 +116,7 @@ class CacheManager():
                     item.readers = item.readers - 1
                     bdd.update(item)
             else:
-                time.sleep(self.DELAY_TIME)
+                time.sleep(self._DELAY_TIME)
                 raise FunctionRetry()
 
         timeout_exec(timeout, _uncache, id, path)
@@ -135,7 +138,7 @@ class CacheManager():
                 self.__max_size_cleaning(removed_list)
         return removed_list
 
-    def remove(self, id: str = None, timeout: int = DEFAULT_TIMEOUT) -> None:
+    def remove(self, id: str = None, timeout: int = _DEFAULT_TIMEOUT) -> None:
         """Delete an archive based on its id."""
 
         def _remove(id: int) -> None:
@@ -164,7 +167,7 @@ class CacheManager():
                         raise XtremCacheArchiveRemovingError(e)
                     bdd.delete(item.id)
                 else:
-                    time.sleep(self.DELAY_TIME)
+                    time.sleep(self._DELAY_TIME)
                     raise FunctionRetry()
 
         timeout_exec(timeout, _remove, id)

@@ -3,7 +3,6 @@ import inspect
 import logging
 from typing import List
 
-from xtremcache import log_level
 from xtremcache.cachemanager import CacheManager
 from xtremcache.exceptions import *
 from xtremcache.utils import *
@@ -23,20 +22,22 @@ class XtreamCacheArgumentParser:
             action='store',
             required=False,
             help='Maximum time of execution in second before stop of the process.')
-        def int_between_0_and_50(string: str) -> int:
-            # try:
-            tested_int = int(string)
-            if tested_int in range(log_level.NOTSET, log_level.CRITICAL+1):
-                return tested_int
-            else:
-                raise ValueError()
-        self._parser.add_argument(
-            '--verbosity', '-v',
-            dest='verbosity',
-            type=int_between_0_and_50,
-            required=False,
-            default=20,
-            help=f'Level of verbosity of xtremcache from {log_level.NOTSET} for debugging to {log_level.CRITICAL} for critical only.')
+        log_level_group = self._parser.add_mutually_exclusive_group(
+            required=False)
+        log_level_group.add_argument(
+            '--verbose', '-v',
+            dest='log_level',
+            action='store_const',
+            const=CacheManager.VERBOSE,
+            default=CacheManager.INFO,
+            help='Increase the level of verobisty to get debug logs.')
+        log_level_group.add_argument(
+            '--quietly', '-q',
+            dest='log_level',
+            action='store_const',
+            const=CacheManager.QUIET,
+            default=CacheManager.INFO,
+            help='Decrease the level of verobisty to get only errors.')
 
         # Command parser
         command_parser = self._parser.add_subparsers(
@@ -217,12 +218,12 @@ def exec(argv: List[str]) -> int:
     try:
         args = XtreamCacheArgumentParser().get_args(argv)
         logging.basicConfig(
-            level=args.verbosity,
+            level=args.log_level,
             format='[xtremcache %(levelname)s - %(asctime)s]: %(message)s')
         CommandRunner(CacheManager(
             cache_dir=args.cache_dir if 'cache_dir' in args else None,
             max_size=args.max_size if 'max_size' in args else None,
-            verbosity=args.verbosity
+            log_level=args.log_level
         )).run(args)
     except Exception as e:
         logging.error(f'{e.__class__.__name__}: {e}')
