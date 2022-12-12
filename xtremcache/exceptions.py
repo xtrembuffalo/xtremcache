@@ -1,7 +1,7 @@
 # --- Global --- #
 
 class XtremCacheException(Exception):
-    """All XtremCache exceptions."""
+    """All xtremcache exceptions."""
     pass
 
 class XtremCacheItemNotFoundError(XtremCacheException):

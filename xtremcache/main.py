@@ -36,7 +36,7 @@ class XtreamCacheArgumentParser:
             type=int_between_0_and_50,
             required=False,
             default=20,
-            help=f'Level of verbosity of XtremCache from {log_level.NOTSET} for debugging to {log_level.CRITICAL} for critical only.')
+            help=f'Level of verbosity of xtremcache from {log_level.NOTSET} for debugging to {log_level.CRITICAL} for critical only.')
 
         # Command parser
         command_parser = self._parser.add_subparsers(
@@ -218,7 +218,7 @@ def exec(argv: List[str]) -> int:
         args = XtreamCacheArgumentParser().get_args(argv)
         logging.basicConfig(
             level=args.verbosity,
-            format='[XtremCache %(levelname)s - %(asctime)s]: %(message)s')
+            format='[xtremcache %(levelname)s - %(asctime)s]: %(message)s')
         CommandRunner(CacheManager(
             cache_dir=args.cache_dir if 'cache_dir' in args else None,
             max_size=args.max_size if 'max_size' in args else None,

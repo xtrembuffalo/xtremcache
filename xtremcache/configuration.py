@@ -15,7 +15,7 @@ class ConfigurationLevel(Enum):
     HARD_CODED = 'Default'
     GLOBAL_FILE = 'Global file'
     LOCAL_FILE = 'Local file'
-    ENV_VAR = 'Environement variables'
+    ENV_VAR = 'Environment variables'
     RUNTIME = 'Runtime'
 
 
