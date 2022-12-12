@@ -134,24 +134,6 @@ class TestConfiguration(unittest.TestCase):
         cfg = ConfigurationManager([DummyConfiguration2()], max_size=TEST_MAX_SIZE_STR)
         self.assertEqual(cfg.max_size, TEST_MAX_SIZE_INT)
 
-    def test_display(self):
-        cfg = ConfigurationManager([DummyConfiguration2()], max_size=TEST_MAX_SIZE_STR)
-        old_sys_stdout = sys.stdout
-        captured_output = io.StringIO()
-        sys.stdout = captured_output
-        TEST_CONFIG_FILE_PATH_2 = DummyConfiguration2().cache_dir
-        except_display = f"""+----------------+-----------------------------------+------------+
-| Origin         | cache_dir                         | max_size   |
-|----------------+-----------------------------------+------------|
-| Dummy config 2 | {TEST_CONFIG_FILE_PATH_2} | 20.0M      |
-| Runtime        | Not defined                       | 10.0M      |
-| Used values    | {TEST_CONFIG_FILE_PATH_2} | 10.0M      |
-+----------------+-----------------------------------+------------+
-"""
-        cfg.display()
-        self.assertEqual(captured_output.getvalue(), except_display)
-        sys.stdout = old_sys_stdout
-
     def test_set_fail(self):
         cfg = ConfigurationManager([EmptyConfiguration()])
         self.assertRaises(NotImplementedError, cfg.set_cache_dir, TEST_CACHE_DIR_PATH, EMPTY_CONFIG_ID)
