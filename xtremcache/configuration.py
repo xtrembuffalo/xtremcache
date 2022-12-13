@@ -4,6 +4,7 @@ from abc import ABC, abstractproperty
 from enum import Enum
 from functools import lru_cache
 from typing import List
+from pathlib import Path
 
 import yaml
 from tabulate import tabulate, SEPARATING_LINE
@@ -68,11 +69,7 @@ class HardcodedConfiguration(Configuration):
 
     @property
     def cache_dir(self) -> str:
-        if isUnix():
-            path = os.path.join('~', f'.{get_app_name()}')
-        else:
-            path = os.path.join(os.getenv('LOCALAPPDATA'), f'.{get_app_name()}')
-        return path
+        return os.path.join(get_configuration_location(), 'data')
 
     @property
     def max_size(self) -> int:
@@ -128,10 +125,7 @@ class FileConfiguration(Configuration, ABC):
 class HomeFileConfiguration(FileConfiguration):
     @property
     def config_path(self) -> str:
-        if isUnix():
-            return os.path.join('~', f'.{get_app_name()}', 'config.yml')
-        else:
-            return os.path.join(os.getenv('LOCALAPPDATA'), f'.{get_app_name()}', 'config.yml')
+        return os.path.join(get_configuration_location(), 'config.yml')
 
     @property
     def id_(self) -> str:
@@ -298,3 +292,10 @@ def raw_to_small_size(raw_size: int) -> str: # TODO everything
             return f'{small_size_int}{symbol}'
     else:
         return str(raw_size)
+
+def get_configuration_location() -> str:
+    """Provide configuration location"""
+
+    path = Path.home() if isUnix() else os.getenv('LOCALAPPDATA')
+    path = os.path.join(path, f'.{get_app_name()}')
+    return os.path.abspath(os.path.realpath(path))

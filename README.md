@@ -37,10 +37,10 @@ cache_manager = CacheManager(
     max_size=20_000_000)
 cache_manager.cache(
     id='UUID',
-    path='~/dir_to_cache')
+    path='/tmp/dir_to_cache')
 cache_manager.uncache(
     id='UUID',
-    path='~/destination_dir')
+    path='/tmp/destination_dir')
 ```
 
 Shell:
@@ -48,8 +48,8 @@ Shell:
 ```sh
 xtremcache config set cache_dir '/tmp/xtremcache' --local
 xtremcache config set max_size '20m' --local
-xtremcache cache --id 'UUID' '~/dir_to_cache'
-xtremcache uncache --id 'UUID' '~/destination_dir'
+xtremcache cache --id 'UUID' '/tmp/dir_to_cache'
+xtremcache uncache --id 'UUID' '/tmp/destination_dir'
 ```
 
 ---
@@ -70,10 +70,10 @@ cache_manager = CacheManager(
     max_size=20_000_000)
 cache_manager.cache(
     id='UUID',
-    path='~/dir_to_cache')
+    path='/tmp/dir_to_cache')
 cache_manager.cache(
     id='UUID',
-    path='~/new_dir_to_cache',
+    path='/tmp/new_dir_to_cache',
     force=True)
 ```
 
@@ -82,8 +82,8 @@ Shell:
 ```sh
 xtremcache config set cache_dir '/tmp/xtremcache' --local
 xtremcache config set max_size '20m' --local
-xtremcache cache --id 'UUID' '~/dir_to_cache'
-xtremcache cache --force --id 'UUID' '~/new_dir_to_cache'
+xtremcache cache --id 'UUID' '/tmp/dir_to_cache'
+xtremcache cache --force --id 'UUID' '/tmp/new_dir_to_cache'
 ```
 
 ---
@@ -104,7 +104,7 @@ cache_manager = CacheManager(
     max_size='20m')
 cache_manager.cache(
     id='UUID',
-    path='~/dir_to_cache')
+    path='/tmp/dir_to_cache')
 cache_manager.remove(
     id='UUID')
 ```
@@ -114,7 +114,7 @@ Shell:
 ```sh
 xtremcache config set cache_dir '/tmp/xtremcache' --local
 xtremcache config set max_size '20m' --local
-xtremcache cache --id 'UUID' '~/dir_to_cache'
+xtremcache cache --id 'UUID' '/tmp/dir_to_cache'
 xtremcache remove --id 'UUID'
 ```
 
@@ -136,7 +136,7 @@ cache_manager = CacheManager(
     max_size='20m')
 cache_manager.cache(
     id='UUID',
-    path='~/dir_to_cache')
+    path='/tmp/dir_to_cache')
 cache_manager.remove()
 ```
 
@@ -145,6 +145,6 @@ Shell:
 ```sh
 xtremcache config set cache_dir '/tmp/xtremcache' --local
 xtremcache config set max_size '20m' --local
-xtremcache cache --id 'UUID' '~/dir_to_cache'
+xtremcache cache --id 'UUID' '/tmp/dir_to_cache'
 xtremcache remove
 ```
