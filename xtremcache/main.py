@@ -219,7 +219,8 @@ def exec(argv: List[str]) -> int:
         args = XtreamCacheArgumentParser().get_args(argv)
         logging.basicConfig(
             level=args.log_level,
-            format='[xtremcache %(levelname)s - %(asctime)s]: %(message)s')
+            format='[xtremcache %(levelname)s - %(asctime)s]: %(message)s',
+            datefmt='%H:%M:%S')
         CommandRunner(CacheManager(
             cache_dir=args.cache_dir if 'cache_dir' in args else None,
             max_size=args.max_size if 'max_size' in args else None,

@@ -23,7 +23,8 @@ class CacheManager():
         self.__archiver = create_archiver(self.__config.cache_dir)
         logging.basicConfig(
             level=log_level,
-            format='[xtremcache %(levelname)s - %(asctime)s]: %(message)s')
+            format='[xtremcache %(levelname)s - %(asctime)s]: %(message)s',
+            datefmt='%H:%M:%S')
         self.__bdd_manager = BddManager(self.__config.cache_dir, log_level)
 
     @property
