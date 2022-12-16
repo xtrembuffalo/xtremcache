@@ -11,6 +11,7 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from xtremcache.exceptions import *
 from xtremcache.utils import *
+from xtremcache.version import __app_name__
 
 
 class BddManager():
@@ -25,7 +26,7 @@ class BddManager():
     def __db_location(self) -> str:
         """Path to used database."""
 
-        return os.path.join(self.__data_base_dir, f'{get_app_name()}.db')
+        return os.path.join(self.__data_base_dir, f'{__app_name__}.db')
 
     @property
     def size(self) -> int:

@@ -8,10 +8,14 @@ def __get_install_requires(rtype):
     requirements = Path(f'{rtype}-requirements.txt').read_text()
     return requirements.split()
 
+version = {}
+with open(os.path.join('xtremcache', 'version.py')) as fp:
+    exec(fp.read(), version)
+
 setup(
-    name='xtremcache',
-    version='2.0.1',
-    author='xtrembuffalo',
+    name=version['__app_name__'],
+    version=version['__version__'],
+    author=version['__author__'],
     author_email='tristan.cladet@gmail.com',
     description='Handle generic file and directories caching',
     long_description=Path('README.md').read_text(),
@@ -47,17 +51,17 @@ setup(
         (
             os.path.join('..','..','xtremcache','ext','msys2','zip','v3.0','bin'),
             [
-                os.path.join('xtremcache','ext','msys2','zip','v3.0','bin', 'zip.exe'),
-                os.path.join('xtremcache','ext','msys2','zip','v3.0','bin', 'msys-2.0.dll'),
-                os.path.join('xtremcache','ext','msys2','zip','v3.0','bin', 'msys-bz2-1.dll'),
+                os.path.join('xtremcache','ext','msys2','zip','v3.0','bin','zip.exe'),
+                os.path.join('xtremcache','ext','msys2','zip','v3.0','bin','msys-2.0.dll'),
+                os.path.join('xtremcache','ext','msys2','zip','v3.0','bin','msys-bz2-1.dll'),
             ]
         ),
         (
             os.path.join('..','..','xtremcache','ext','msys2','unzip','v6.00','bin'),
             [
-                os.path.join('xtremcache','ext','msys2','unzip','v6.00','bin', 'unzip.exe'),
-                os.path.join('xtremcache','ext','msys2','unzip','v6.00','bin', 'msys-2.0.dll'),
-                os.path.join('xtremcache','ext','msys2','unzip','v6.00','bin', 'msys-bz2-1.dll'),
+                os.path.join('xtremcache','ext','msys2','unzip','v6.00','bin','unzip.exe'),
+                os.path.join('xtremcache','ext','msys2','unzip','v6.00','bin','msys-2.0.dll'),
+                os.path.join('xtremcache','ext','msys2','unzip','v6.00','bin','msys-bz2-1.dll'),
             ]
         )
     ],
