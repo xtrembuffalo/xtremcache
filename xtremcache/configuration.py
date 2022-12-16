@@ -23,12 +23,6 @@ class ConfigurationLevel(Enum):
 
 class Configuration(ABC):
     @abstractproperty
-    def id_(self) -> str:
-        """Return a unique printable / readable identifier for this configuration."""
-
-        pass
-
-    @abstractproperty
     def cache_dir(self) -> str:
         """Compute and return the dir location of all archive database."""
 
@@ -39,6 +33,15 @@ class Configuration(ABC):
         """Compute and return the maximum size of the all archive database."""
 
         pass
+
+    def __init__(self, id_) -> None:
+        self.__id = id_
+
+    @property
+    def id_(self) -> str:
+        """Return a unique printable / readable identifier for this configuration."""
+
+        return self.__id
 
     @property
     def is_set_cache_dir(self) -> bool:
@@ -55,19 +58,15 @@ class Configuration(ABC):
     def set_cache_dir(self, value: str) -> None:
         """Update the cahe_dir value. (Not mandatory)"""
 
-        raise NotImplementedError(f'This type of configuration ({self.id_} do not allow cache_dir updates.')
+        raise NotImplementedError(f'This type of configuration ({self.id_}) do not allow cache_dir updates.')
 
     def set_max_size(self, value: str) -> None:
         """Update the max_size value. (Not mandatory)"""
 
-        raise NotImplementedError(f'This type of configuration ({self.id_} do not allow max_size updates.')
+        raise NotImplementedError(f'This type of configuration ({self.id_}) do not allow max_size updates.')
 
 
 class HardcodedConfiguration(Configuration):
-    @property
-    def id_(self) -> str:
-        return ConfigurationLevel.HARD_CODED.value
-
     @property
     def cache_dir(self) -> str:
         return os.path.join(get_configuration_location(), 'data')
@@ -86,9 +85,9 @@ class HardcodedConfiguration(Configuration):
 
 
 class FileConfiguration(Configuration, ABC):
-    @abstractproperty
-    def config_path(self) -> str:
-        pass
+    def __init__(self, id_, confg_path) -> None:
+        self.__config_path = confg_path
+        super().__init__(id_)
 
     def _read_yaml_properties(self) -> dict:
         file_content = dict()
@@ -96,6 +95,10 @@ class FileConfiguration(Configuration, ABC):
             with open(self.config_path, 'r') as f:
                 file_content = yaml.safe_load(f)
         return file_content
+
+    @property
+    def config_path(self) -> str:
+        return self.__config_path
 
     @property
     def cache_dir(self) -> str:
@@ -123,31 +126,7 @@ class FileConfiguration(Configuration, ABC):
             yaml.safe_dump(file_content, f, default_flow_style=False)
 
 
-class HomeFileConfiguration(FileConfiguration):
-    @property
-    def config_path(self) -> str:
-        return os.path.join(get_configuration_location(), 'config.yml')
-
-    @property
-    def id_(self) -> str:
-        return ConfigurationLevel.GLOBAL_FILE.value
-
-
-class LocalFileConfiguration(FileConfiguration):
-    @property
-    def config_path(self) -> str:
-        return os.path.join('.', 'config.yml')
-
-    @property
-    def id_(self) -> str:
-        return ConfigurationLevel.LOCAL_FILE.value
-
-
 class EnvironementConfiguration(Configuration):
-    @property
-    def id_(self) -> str:
-        return ConfigurationLevel.ENV_VAR.value
-
     @property
     def cache_dir(self) -> str:
         return self.__env_cache_dir()
@@ -164,14 +143,10 @@ class EnvironementConfiguration(Configuration):
 
 
 class RuntimeConfiguration(Configuration):
-    def __init__(self, cache_dir: str, max_size: str, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
+    def __init__(self, id_, cache_dir: str, max_size: str) -> None:
         self.__max_size = small_to_raw_size(max_size)
         self.__cache_dir = cache_dir
-
-    @property
-    def id_(self) -> str:
-        return ConfigurationLevel.RUNTIME.value
+        super().__init__(id_)
 
     @property
     def cache_dir(self) -> str:
@@ -188,16 +163,19 @@ class ConfigurationManager:
             configuration_priority: List[Configuration] = None,
             cache_dir: str = None,
             max_size: str = None) -> None:
+        # If no configuration list are past use the standard one.
         if configuration_priority:
             self.__configuration_priority = configuration_priority
         else:
             self.__configuration_priority = [
-                HardcodedConfiguration(),
-                HomeFileConfiguration(),
-                LocalFileConfiguration(),
-                EnvironementConfiguration(),
+                HardcodedConfiguration(ConfigurationLevel.HARD_CODED.value),
+                FileConfiguration(ConfigurationLevel.GLOBAL_FILE.value, os.path.join(get_configuration_location(), 'config.yml')),
+                FileConfiguration(ConfigurationLevel.LOCAL_FILE.value, os.path.join('.', 'config.yml')),
+                EnvironementConfiguration(ConfigurationLevel.ENV_VAR.value),
             ]
-        self.__configuration_priority.append(RuntimeConfiguration(cache_dir, max_size))
+        # In anycase the runtime configuration is top level priority.
+        self.__configuration_priority.append(
+            RuntimeConfiguration(ConfigurationLevel.RUNTIME.value, cache_dir, max_size))
 
 
     @property
@@ -274,7 +252,7 @@ def small_to_raw_size(small_size: str) -> int:
         raise XtremCacheInputError(
             f'Invalid max_size format: get {small_size}, correct format are \d+[TGMtgm]? e.g.: \'5g\', \'100m\', \'5000\' or \'1t\'.')
 
-def raw_to_small_size(raw_size: int) -> str: # TODO everything
+def raw_to_small_size(raw_size: int) -> str:
     """Interpret the given raw_size int from bytes to terra, giga, mega or bytes.
 
     Choose the largest multiplicator possible.

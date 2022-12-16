@@ -1,12 +1,10 @@
-import io
 import os
-import sys
 import unittest
 
 import yaml
-from xtremcache.configuration import (Configuration, ConfigurationManager,
-                                      FileConfiguration)
 
+from xtremcache.configuration import (Configuration, ConfigurationManager,
+                                      FileConfiguration, RuntimeConfiguration)
 
 HARD_CODED_MAX_SIZE = 50_000_000_000
 
@@ -29,37 +27,14 @@ def create_config_file(path, cache_dir, max_size):
         yaml.dump(config_dict, f)
 
 
-class FileTestConfiguration(FileConfiguration):
-    @property
-    def id_(self) -> str:
-        return TEST_FILE_CONFIG_ID
-    @property
-    def config_path(self) -> str:
-        return TEST_CONFIG_FILE_PATH
+def get_FileTestConfiguration():
+    return FileConfiguration(TEST_FILE_CONFIG_ID, TEST_CONFIG_FILE_PATH)
 
+def get_DummyConfiguration1():
+    return RuntimeConfiguration('Dummy config 1', os.path.join(TEST_CACHE_DIR_PATH, '1'), TEST_MAX_SIZE_STR)
 
-class DummyConfiguration1(Configuration):
-    @property
-    def id_(self) -> str:
-        return 'Dummy config 1'
-    @property
-    def cache_dir(self) -> str:
-        return os.path.join(TEST_CACHE_DIR_PATH, '1')
-    @property
-    def max_size(self) -> int:
-        return TEST_MAX_SIZE_INT
-
-
-class DummyConfiguration2(Configuration):
-    @property
-    def id_(self) -> str:
-        return 'Dummy config 2'
-    @property
-    def cache_dir(self) -> str:
-        return os.path.join(TEST_CACHE_DIR_PATH, '2')
-    @property
-    def max_size(self) -> int:
-        return TEST_MAX_SIZE_INT_2
+def get_DummyConfiguration2():
+    return RuntimeConfiguration('Dummy config 2', os.path.join(TEST_CACHE_DIR_PATH, '2'), TEST_MAX_SIZE_STR_2)
 
 
 class EmptyConfiguration(Configuration):
@@ -82,7 +57,7 @@ class EmptyConfiguration(Configuration):
 
 class TestFileConfiguration(unittest.TestCase):
     def setUp(self):
-        self.ftc = FileTestConfiguration()
+        self.ftc = get_FileTestConfiguration()
 
     def tearDown(self):
         if os.path.isfile(TEST_CONFIG_FILE_PATH):
@@ -123,23 +98,23 @@ class TestFileConfiguration(unittest.TestCase):
 
 class TestConfiguration(unittest.TestCase):
     def test_strategy_priority(self):
-        cfg = ConfigurationManager([DummyConfiguration1(), DummyConfiguration2()])
+        cfg = ConfigurationManager([get_DummyConfiguration1(), get_DummyConfiguration2()])
         self.assertEqual(cfg.max_size, TEST_MAX_SIZE_INT_2)
-        cfg = ConfigurationManager([DummyConfiguration2(), DummyConfiguration1()])
+        cfg = ConfigurationManager([get_DummyConfiguration2(), get_DummyConfiguration1()])
         self.assertEqual(cfg.max_size, TEST_MAX_SIZE_INT)
 
     def test_runtime_configuration(self):
         cfg = ConfigurationManager([], max_size=TEST_MAX_SIZE_STR)
         self.assertEqual(cfg.max_size, TEST_MAX_SIZE_INT)
-        cfg = ConfigurationManager([DummyConfiguration2()], max_size=TEST_MAX_SIZE_STR)
+        cfg = ConfigurationManager([get_DummyConfiguration2()], max_size=TEST_MAX_SIZE_STR)
         self.assertEqual(cfg.max_size, TEST_MAX_SIZE_INT)
 
     def test_set_fail(self):
-        cfg = ConfigurationManager([EmptyConfiguration()])
+        cfg = ConfigurationManager([EmptyConfiguration('test id')])
         self.assertRaises(NotImplementedError, cfg.set_cache_dir, TEST_CACHE_DIR_PATH, EMPTY_CONFIG_ID)
 
     def test_set_success(self):
-        cfg = ConfigurationManager([FileTestConfiguration()])
+        cfg = ConfigurationManager([get_FileTestConfiguration()])
         cfg.set_max_size(TEST_MAX_SIZE_STR_2, TEST_FILE_CONFIG_ID)
         self.assertEqual(cfg.max_size, TEST_MAX_SIZE_INT_2)
 
