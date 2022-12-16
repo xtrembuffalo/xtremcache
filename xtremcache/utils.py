@@ -9,28 +9,13 @@ from typing import Any, Callable, List
 from xtremcache.exceptions import *
 
 
-def is_executable() -> bool:
-    """Call after pyinstaller in executable"""
-
-    return getattr(sys, 'frozen', False)
-
 def xtremcache_location() -> str:
     """Return the path to xtremcache dir."""
 
-    if is_executable():
+    if getattr(sys, 'frozen', False):
         return sys._MEIPASS
     else:
         return os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
-
-def get_app_name() -> str:
-    """Pulic application name."""
-
-    return 'xtremcache'
-
-def get_public_props(obj: object) -> List[str]:
-    """List all public properties of an object."""
-
-    return list(name for name in dir(obj) if not name.startswith('_'))
 
 def str_to_md5(val: str) -> str:
     """Hash a string thanks to md5 algo."""
@@ -41,16 +26,6 @@ def isUnix() -> bool:
     """Return True if the building is an Unix at compilation time."""
 
     return not ('win' in sys.platform)
-
-def remove_file_extention(path: str) -> str:
-    """Remove all the file extention at the end of a file."""
-
-    dir = os.path.dirname(path)
-    basename = os.path.basename(path)
-    suffixes = Path(basename).suffixes
-    for s in suffixes:
-        basename = basename.replace(s, '')
-    return os.path.join(dir, basename)
 
 def timeout_exec(timeout: int, fn: Callable, *args, **kwargs) -> Any:
     """Try to execute fn and relaunch it if the FunctionRetry signal is raised and some time are left."""
