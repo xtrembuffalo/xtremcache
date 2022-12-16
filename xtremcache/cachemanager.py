@@ -79,15 +79,13 @@ class CacheManager():
                         self.__max_size_cleaning()
                     else:
                         self.remove(id)
-                        raise XtremCacheMaxSizeCachedError(
-                            f'Too big archive to be cached.')
+                        raise XtremCacheMaxSizeCachedError(id)
             else:
                 if force:
                     self.remove(id)
                     _cache(id, path, False)
                 else:
-                    raise XtremCacheAlreadyCachedError(
-                        f'An "{id}" item is already cached. Use "--force" option if you want to overwrite it.')
+                    raise XtremCacheAlreadyCachedError(id)
 
         timeout_exec(timeout, _cache, id, path, force, compression_level, excluded)
 
@@ -112,13 +110,13 @@ class CacheManager():
                     item.readers = item.readers - 1
                     bdd.update(item)
                     self.remove(id)
-                    raise XtremCacheArchiveExtractionError(e)
+                    raise e
                 else:
                     item.readers = item.readers - 1
                     bdd.update(item)
             else:
                 time.sleep(self._DELAY_TIME)
-                raise FunctionRetry()
+                raise FunctionRecallAsked(_uncache)
 
         timeout_exec(timeout, _uncache, id, path)
 
@@ -165,11 +163,11 @@ class CacheManager():
                             os.remove(item.archive_path)
                         os.chdir(c_cwd)
                     except Exception as e:
-                        raise XtremCacheArchiveRemovingError(e)
+                        raise XtremCacheArchiveRemovingError(id, e)
                     bdd.delete(item.id)
                 else:
                     time.sleep(self._DELAY_TIME)
-                    raise FunctionRetry()
+                    raise FunctionRecallAsked(_remove)
 
         timeout_exec(timeout, _remove, id)
 

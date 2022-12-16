@@ -147,7 +147,7 @@ class BddManager():
                     session.commit()
                     return self.get(id)
                 else:
-                    raise XtremCacheItemNotFoundError(e)
+                    raise XtremCacheItemNotFoundError(id)
         return item
 
     def update(self, item) -> None:
@@ -160,7 +160,7 @@ class BddManager():
                 item_from_bdd.copy_from(item)
                 session.commit()
             except Exception as e:
-                raise XtremCacheItemNotFoundError(e)
+                raise XtremCacheItemNotFoundError(item.id)
 
     def delete(self, id: str):
         """Delete a db Item based on its id."""
@@ -191,7 +191,7 @@ class BddManager():
             try:
                 values = session.query(member).all()
             except Exception as e:
-                raise XtremCacheItemNotFoundError(e)
+                raise XtremCacheItemNotFoundError('anything')
         return list(map(lambda v: v[0], values))
 
     @property
@@ -202,5 +202,5 @@ class BddManager():
             try:
                 item = session.query(self.Item).order_by(self.Item.created_date.asc()).first()
             except Exception as e:
-                raise XtremCacheItemNotFoundError(e)
+                raise XtremCacheItemNotFoundError('the oldest item')
         return item

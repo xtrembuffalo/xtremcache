@@ -59,7 +59,7 @@ class ArchiveManager():
 
         dest_path = self.id_to_archive_path(id)
         if not os.path.exists(src_path):
-            raise XtremCacheFileNotFoundError(f'Can\' find {src_path}')
+            raise XtremCacheFileNotFoundError(src_path)
         try:
             os.makedirs(os.path.dirname(dest_path), exist_ok=True)
             exclude_args = []
@@ -84,7 +84,7 @@ class ArchiveManager():
                 cwd=src_path if src_is_dir else os.path.dirname(src_path),
                 check=True)
         except Exception as e:
-            raise XtremCacheArchiveCreationError(e)
+            raise XtremCacheArchiveCreationError(id, e)
         return dest_path
 
     def extract(self, id: str, path: str) -> None:
@@ -104,7 +104,7 @@ class ArchiveManager():
                 check=True)
             pass
         except Exception as e:
-            raise XtremCacheArchiveExtractionError(e)
+            raise XtremCacheArchiveExtractionError(path, e)
 
 
 class WinArchiver(ArchiveManager):
