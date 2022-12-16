@@ -155,4 +155,4 @@ class LnxArchiver(ArchiveManager):
 def create_archiver(cache_dir: str) -> ArchiveManager:
     """Factory of archvier depending of the os."""
 
-    return LnxArchiver(cache_dir) if isUnix() else WinArchiver(cache_dir)
+    return LnxArchiver(cache_dir) if is_unix() else WinArchiver(cache_dir)

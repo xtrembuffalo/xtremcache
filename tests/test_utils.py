@@ -40,13 +40,13 @@ def generate_dir_to_cache(root: str) -> None:
         for n in range(3):
             sub_dir = os.path.join(root_dir, get_random_text())
             os.makedirs(sub_dir)
-            if n == 2 and not isUnix():
+            if n == 2 and not is_unix():
                 subprocess.run(['attrib', '+H', sub_dir], check=True)
             for m in range(3):
                 file_path = os.path.join(sub_dir, f'{get_random_text()}.tmp')
                 with open(file_path, 'a') as f:
                     f.write(get_random_text(100))
-                if isUnix():
+                if is_unix():
                     # symlink for unix
                     cwd = os.getcwd()
                     os.chdir(os.path.dirname(file_path))

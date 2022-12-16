@@ -211,8 +211,8 @@ class CommandRunner():
             command_func(**kwargs)
 
 
-def exec(argv: List[str]) -> int:
-    """Handle the full process execution in command line."""
+def run_xtremcache(argv: List[str]) -> int:
+    """Handle generic file and directories caching on Windows or Linux."""
 
     rt = 0
     try:

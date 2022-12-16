@@ -195,7 +195,7 @@ class BddManager():
         return list(map(lambda v: v[0], values))
 
     @property
-    def older(self):
+    def oldest(self):
         """Return the older db Item."""
 
         with Session(self.__engine) as session:

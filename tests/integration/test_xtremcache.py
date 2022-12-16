@@ -3,12 +3,12 @@ import tempfile
 import yaml
 from ddt import ddt, data
 
-from xtremcache.main import exec
+from xtremcache.main import run_xtremcache
 from tests.test_utils import *
 
 
-TESTS_MAX_SIZE_INT=10_000_000
-TESTS_MAX_SIZE_STR='10m'
+TESTS_MAX_SIZE_INT = 10_000_000
+TESTS_MAX_SIZE_STR = '10m'
 
 
 @ddt
@@ -38,10 +38,10 @@ class TestXtremcache(unittest.TestCase):
 
     def tearDown(self):
         os.chdir(self._old_cwd)
-        remove_file(self._temp_dir)
+        filesystem_remove(self._temp_dir)
 
     def xtremcache(self, *args):
-        return exec(list(args))
+        return run_xtremcache(list(args))
 
     def test_configuration(self):
         self.assertTrue(os.path.isfile(self._config_file))

@@ -36,7 +36,7 @@ class TestCacheDir(unittest.TestCase):
         self.assertRaises(XtremCacheItemNotFoundError, self.__cache_manager.uncache, id, self.__dir_to_uncache)
 
     def tearDown(self):
-        remove_file(self._temp_dir)
+        filesystem_remove(self._temp_dir)
 
 @ddt
 class TestCacheFile(unittest.TestCase):
@@ -62,7 +62,7 @@ class TestCacheFile(unittest.TestCase):
         self.assertRaises(XtremCacheItemNotFoundError, self.__cache_manager.uncache, id, self._temp_dir)
 
     def tearDown(self):
-        remove_file(self._temp_dir)
+        filesystem_remove(self._temp_dir)
 
 @ddt
 class TestCacheGlobal(unittest.TestCase):
@@ -81,7 +81,7 @@ class TestCacheGlobal(unittest.TestCase):
     @data(*get_id_data())
     def test_force_cache(self, id):
         self.__cache_manager.cache(id, self.__dir_to_cache)
-        remove_file(self.__dir_to_cache)
+        filesystem_remove(self.__dir_to_cache)
         generate_dir_to_cache(self.__dir_to_cache)
         self.assertRaises(XtremCacheAlreadyCachedError, self.__cache_manager.cache, id, self.__dir_to_cache)
         self.__cache_manager.cache(id, self.__dir_to_cache, force=True)
@@ -151,7 +151,7 @@ class TestCacheGlobal(unittest.TestCase):
             self.assertRaises(XtremCacheItemNotFoundError, self.__cache_manager.uncache, removed_id, self.__dir_to_uncache)
 
     def tearDown(self):
-        remove_file(self._temp_dir)
+        filesystem_remove(self._temp_dir)
 
 @ddt
 class TestCacheConcurrent(unittest.TestCase):
@@ -189,7 +189,7 @@ class TestCacheConcurrent(unittest.TestCase):
                 executor.submit(exec_cache, self.__cache_dir, self.__dir_to_cache, id, index)
 
     def tearDown(self):
-        remove_file(self._temp_dir)
+        filesystem_remove(self._temp_dir)
 
 @ddt
 class TestCacheCleanning(unittest.TestCase):
@@ -221,4 +221,4 @@ class TestCacheCleanning(unittest.TestCase):
             self.assertLessEqual(get_dir_size(self.__cache_dir), max_size)
 
     def tearDown(self):
-        remove_file(self._temp_dir)
+        filesystem_remove(self._temp_dir)

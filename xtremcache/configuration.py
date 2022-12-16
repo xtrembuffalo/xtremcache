@@ -297,6 +297,6 @@ def raw_to_small_size(raw_size: int) -> str: # TODO everything
 def get_configuration_location() -> str:
     """Provide configuration location"""
 
-    path = Path.home() if isUnix() else os.getenv('LOCALAPPDATA')
+    path = Path.home() if is_unix() else os.getenv('LOCALAPPDATA')
     path = os.path.join(path, f'.{__app_name__}')
     return os.path.abspath(os.path.realpath(path))

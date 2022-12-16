@@ -1,10 +1,9 @@
-import subprocess
 import hashlib
-import sys
 import os
+import subprocess
+import sys
 import time
-from pathlib import Path
-from typing import Any, Callable, List
+from typing import Any, Callable
 
 from xtremcache.exceptions import *
 
@@ -22,12 +21,12 @@ def str_to_md5(val: str) -> str:
 
     return hashlib.md5(val.encode()).hexdigest()
 
-def isUnix() -> bool:
+def is_unix() -> bool:
     """Return True if the building is an Unix at compilation time."""
 
     return not ('win' in sys.platform)
 
-def timeout_exec(timeout: int, fn: Callable, *args, **kwargs) -> Any:
+def timeout_exec(timeout_sec: int, fn: Callable, *args, **kwargs) -> Any:
     """Try to execute fn and relaunch it if the FunctionRetry signal is raised and some time are left."""
 
     start_time = time.time()
@@ -35,25 +34,28 @@ def timeout_exec(timeout: int, fn: Callable, *args, **kwargs) -> Any:
     while retry:
         try:
             return fn(*args, **kwargs)
-        except FunctionRetry as e:
-            if timeout and (time.time() - start_time) > timeout:
+        except FunctionRecallAsked as e:
+            if timeout_sec and (time.time() - start_time) > timeout_sec:
                 retry = False
-                raise XtremCacheTimeoutError(f'{fn.__name__} timeout: {e}')
+                raise XtremCacheTimeoutError(fn, timeout_sec, e)
 
-def remove_file(file: str) -> None:
-    if isUnix():
+def filesystem_remove(entry: str, recursive: bool = True) -> None:
+    """Delete given file or directories."""
+
+    if is_unix():
         command = [
             'rm',
-            '-rf',
-            file
+            '-r' if recursive else '',
+            '-f',
+            entry
         ]
     else:
        command = [
             'cmd',
             '/C',
-            'RD' if os.path.isdir(file) else 'DEL',
+            'RD' if recursive and os.path.isdir(entry) else 'DEL',
             '/S',
             '/Q',
-            file
+            entry
        ]
     subprocess.run(command, check=True)

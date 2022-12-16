@@ -45,5 +45,5 @@ class TestArchiver(unittest.TestCase):
         self.assertFalse(dircmp(self.__dir_to_extract, self.__dir_to_archive, excluded_files), 'Exclude file are still in destination')
 
     def tearDown(self):
-        remove_file(self.__temp_dir)
+        filesystem_remove(self.__temp_dir)
 

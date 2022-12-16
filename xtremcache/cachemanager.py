@@ -1,6 +1,7 @@
 import logging
 import os
 import time
+from typing import List
 
 from xtremcache.archivermanager import create_archiver
 from xtremcache.bddmanager import BddManager
@@ -132,8 +133,8 @@ class CacheManager():
         all_sizes.append(bdd.size)
         if len(all_sizes):
             if sum(all_sizes) >= self.max_size:
-                self.remove(bdd.older.id)
-                removed_list.append(bdd.older)
+                self.remove(bdd.oldest.id)
+                removed_list.append(bdd.oldest)
                 self.__max_size_cleaning(removed_list)
         return removed_list
 
