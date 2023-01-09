@@ -58,12 +58,12 @@ def generate_dir_to_cache(root: str) -> None:
     with open(os.path.join(root_dir, f'{get_random_text()}.tmp'), 'a') as f:
         f.write(get_random_text(100))
 
-def dircmp(dir1: str, dir2: str, excluded: List[str] = []) -> bool:
+def dircmp(dir1: str, dir2: str) -> bool:
     """Compare the content of two dir.
 
     Allow to ignore the files listed in excluded from dir1."""
 
-    def _get_all_files(dir, excluded=[]):
+    def _get_all_files(dir):
         rt = {}
         for root, dirs, files in os.walk(dir, topdown=False):
             for name in files:
@@ -74,8 +74,5 @@ def dircmp(dir1: str, dir2: str, excluded: List[str] = []) -> bool:
                 file = os.path.relpath(os.path.join(root, name), dir)
                 key = 'dir'
                 rt[key]=[file] if not rt.get(key) else rt[key] + [file]
-        for e in excluded:
-            for type_, files in rt.items():
-                rt[type_] = list(filter(lambda file: not file.startswith(e), files))
         return rt
-    return _get_all_files(dir1, excluded=excluded) == _get_all_files(dir2)
+    return _get_all_files(dir1) == _get_all_files(dir2)

@@ -97,6 +97,7 @@ class ArchiveManager():
                     self.unzip_exec,
                     '-qq',
                     '-u',
+                    '-o',
                     archive_path,
                     '-d',
                     path
