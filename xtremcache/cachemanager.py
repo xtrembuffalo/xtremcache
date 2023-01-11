@@ -99,7 +99,7 @@ class CacheManager():
             try:
                 item = bdd.get(id)
             except XtremCacheItemNotFoundError as e:
-                logging.error(f'Impossible to find "{id}"')
+                logging.info(f'Impossible to find "{id}"')
                 raise e
             if item.can_read:
                 item.readers = item.readers + 1
